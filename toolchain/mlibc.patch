@@ -1,3 +1,33 @@
+diff --git a/mlibc/abis/echidnaos/auxv.h b/mlibc/abis/echidnaos/auxv.h
+new file mode 100644
+index 0000000..6f17767
+--- /dev/null
++++ b/mlibc/abis/echidnaos/auxv.h
+@@ -0,0 +1,10 @@
++#ifndef _ABIBITS_AUXV_H
++#define _ABIBITS_AUXV_H
++
++#define AT_ENTRY 10
++#define AT_PHDR 20
++#define AT_PHENT 21
++#define AT_PHNUM 22
++#define AT_EXECFN 31
++
++#endif // _ABIBITS_AUXV_H
+diff --git a/mlibc/abis/echidnaos/seek-whence.h b/mlibc/abis/echidnaos/seek-whence.h
+new file mode 100644
+index 0000000..901121c
+--- /dev/null
++++ b/mlibc/abis/echidnaos/seek-whence.h
+@@ -0,0 +1,8 @@
++#ifndef _ABIBITS_SEEK_WHENCE_H
++#define _ABIBITS_SEEK_WHENCE_H
++
++#define SEEK_CUR 2
++#define SEEK_END 1
++#define SEEK_SET 0
++
++#endif // _ABIBITS_SEEK_WHENCE_H
 diff --git a/mlibc-orig/meson.build b/mlibc/meson.build
 index 3818563..7c788af 100644
 --- a/mlibc-orig/meson.build
@@ -108,7 +138,7 @@ index cde5af7..3c5063b 100644
  }
  
 diff --git a/mlibc-orig/options/elf/generic/startup.cpp b/mlibc/options/elf/generic/startup.cpp
-index 73cc50e..97f2a99 100644
+index 73cc50e..9265090 100644
 --- a/mlibc-orig/options/elf/generic/startup.cpp
 +++ b/mlibc/options/elf/generic/startup.cpp
 @@ -6,6 +6,7 @@
@@ -119,19 +149,15 @@ index 73cc50e..97f2a99 100644
  
  extern "C" size_t __init_array_start[];
  extern "C" size_t __init_array_end[];
-@@ -21,16 +22,17 @@ struct global_constructor_guard {
+@@ -21,7 +22,6 @@ struct global_constructor_guard {
  static global_constructor_guard g;
  
  void __mlibc_run_constructors() {
 -/*
      if (!constructors_ran_already) {
-+        mlibc::infoLogger() << "mlibc: __init_array_start: "<<(void*)__init_array_start<< frg::endlog;
-+        mlibc::infoLogger() << "mlibc: __init_array_end: "<<(void*)__init_array_end<< frg::endlog;
          size_t constructor_count = (size_t)__init_array_end - (size_t)__init_array_start;
          constructor_count /= sizeof(void*);
-         for (size_t i = 0; i < constructor_count; i++) {
-             void (*ptr)(void) = (void(*)(void))(__init_array_start[i]);
-+            mlibc::infoLogger() << "mlibc: running constructor "<<(void*)ptr<< frg::endlog;
+@@ -30,7 +30,6 @@ void __mlibc_run_constructors() {
              ptr();
          }
      }
@@ -1045,8 +1071,7 @@ index 0000000..5014c4b
 +exit 0
 diff --git a/mlibc/subprojects/cxxshim/.git/index b/mlibc/subprojects/cxxshim/.git/index
 new file mode 100644
-index 0000000..918a690
-Binary files /dev/null and b/mlibc/subprojects/cxxshim/.git/index differ
+index 0000000..e69de29
 diff --git a/mlibc/subprojects/cxxshim/.git/info/exclude b/mlibc/subprojects/cxxshim/.git/info/exclude
 new file mode 100644
 index 0000000..a5196d1
@@ -1083,12 +1108,10 @@ index 0000000..ada4327
 +0000000000000000000000000000000000000000 43c84fa155156bdb8db1208a3fc789fda22df29c mintsuki <mintsuki@protonmail.com> 1602036085 +0200	clone: from https://github.com/managarm/cxxshim.git
 diff --git a/mlibc/subprojects/cxxshim/.git/objects/pack/pack-7ed93274bd26ade7939fb2402c626904d315698b.idx b/mlibc/subprojects/cxxshim/.git/objects/pack/pack-7ed93274bd26ade7939fb2402c626904d315698b.idx
 new file mode 100644
-index 0000000..ca7834d
-Binary files /dev/null and b/mlibc/subprojects/cxxshim/.git/objects/pack/pack-7ed93274bd26ade7939fb2402c626904d315698b.idx differ
+index 0000000..e69de29
 diff --git a/mlibc/subprojects/cxxshim/.git/objects/pack/pack-7ed93274bd26ade7939fb2402c626904d315698b.pack b/mlibc/subprojects/cxxshim/.git/objects/pack/pack-7ed93274bd26ade7939fb2402c626904d315698b.pack
 new file mode 100644
-index 0000000..535f1a5
-Binary files /dev/null and b/mlibc/subprojects/cxxshim/.git/objects/pack/pack-7ed93274bd26ade7939fb2402c626904d315698b.pack differ
+index 0000000..e69de29
 diff --git a/mlibc/subprojects/cxxshim/.git/packed-refs b/mlibc/subprojects/cxxshim/.git/packed-refs
 new file mode 100644
 index 0000000..bfe9dc5
@@ -2773,8 +2796,7 @@ index 0000000..5014c4b
 +exit 0
 diff --git a/mlibc/subprojects/frigg/.git/index b/mlibc/subprojects/frigg/.git/index
 new file mode 100644
-index 0000000..a88be74
-Binary files /dev/null and b/mlibc/subprojects/frigg/.git/index differ
+index 0000000..e69de29
 diff --git a/mlibc/subprojects/frigg/.git/info/exclude b/mlibc/subprojects/frigg/.git/info/exclude
 new file mode 100644
 index 0000000..a5196d1
@@ -2811,12 +2833,10 @@ index 0000000..1cda05c
 +0000000000000000000000000000000000000000 070aadc38552f226c64a015f050618a48918584f mintsuki <mintsuki@protonmail.com> 1602036086 +0200	clone: from https://github.com/managarm/frigg.git
 diff --git a/mlibc/subprojects/frigg/.git/objects/pack/pack-3a00b324fe716c2400f2d8eb2ad9664cbedec4d7.idx b/mlibc/subprojects/frigg/.git/objects/pack/pack-3a00b324fe716c2400f2d8eb2ad9664cbedec4d7.idx
 new file mode 100644
-index 0000000..88032c7
-Binary files /dev/null and b/mlibc/subprojects/frigg/.git/objects/pack/pack-3a00b324fe716c2400f2d8eb2ad9664cbedec4d7.idx differ
+index 0000000..e69de29
 diff --git a/mlibc/subprojects/frigg/.git/objects/pack/pack-3a00b324fe716c2400f2d8eb2ad9664cbedec4d7.pack b/mlibc/subprojects/frigg/.git/objects/pack/pack-3a00b324fe716c2400f2d8eb2ad9664cbedec4d7.pack
 new file mode 100644
-index 0000000..299f0b2
-Binary files /dev/null and b/mlibc/subprojects/frigg/.git/objects/pack/pack-3a00b324fe716c2400f2d8eb2ad9664cbedec4d7.pack differ
+index 0000000..e69de29
 diff --git a/mlibc/subprojects/frigg/.git/packed-refs b/mlibc/subprojects/frigg/.git/packed-refs
 new file mode 100644
 index 0000000..0f5ce13
@@ -10123,10 +10143,10 @@ index 0000000..282953f
 +
 diff --git a/mlibc/sysdeps/echidnaos/generic/generic.cpp b/mlibc/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
-index 0000000..c0bcab4
+index 0000000..2f7803d
 --- /dev/null
 +++ b/mlibc/sysdeps/echidnaos/generic/generic.cpp
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,128 @@
 +
 +#include <bits/ensure.h>
 +#include <mlibc/debug.hpp>
@@ -10154,7 +10174,6 @@ index 0000000..c0bcab4
 +    }
 +
 +    int sys_getcwd(char *buffer, size_t size) {
-+        mlibc::infoLogger() << "mlibc: in sys_getcwd"<< frg::endlog;
 +        int discard;
 +        asm volatile (
 +            "int $0x80"
@@ -10162,6 +10181,7 @@ index 0000000..c0bcab4
 +            : "a"(0x1a), "c"(buffer)
 +            : "edx", "memory"
 +        );
++        return 0;
 +    }
 +
 +    // Memory Related Functions
@@ -10171,7 +10191,6 @@ index 0000000..c0bcab4
 +    }
 +
 +    int sys_anon_allocate(size_t size, void **pointer) {
-+        mlibc::infoLogger() << "mlibc: in sys_anon_allocate"<< frg::endlog;
 +        int discard;
 +        size_t heap_base;
 +        size_t heap_size;
@@ -10192,8 +10211,6 @@ index 0000000..c0bcab4
 +            : "a"(0x12), "c"(heap_size + size)
 +            : "edx", "memory"
 +        );
-+        mlibc::infoLogger() << "mlibc: " << __func__ << " returning " << (void*)ptr
-+            << frg::endlog;
 +    	*pointer = (void*)ptr;
 +        return 0;
 +    }
@@ -10214,21 +10231,8 @@ index 0000000..c0bcab4
 +    int sys_close(int fd) STUB_ONLY
 +
 +    int sys_seek(int fd, off_t offset, int whence, off_t *new_offset) {
-+        mlibc::infoLogger() << "mlibc: in sys_seek"<< frg::endlog;
 +        int discard;
 +        off_t ret;
-+
-+        switch (whence) {
-+            case SEEK_SET:
-+                whence = 0;
-+                break;
-+            case SEEK_END:
-+                whence = 1;
-+                break;
-+            case SEEK_CUR:
-+                whence = 2;
-+                break;
-+        }
 +
 +        asm volatile ("int $0x80"
 +                : "=a"(ret), "=d"(discard)
@@ -10242,10 +10246,9 @@ index 0000000..c0bcab4
 +    }
 +
 +    int sys_read(int fd, void *buf, size_t count, ssize_t *bytes_read) {
-+        mlibc::infoLogger() << "mlibc: in sys_read"<< frg::endlog;
-+        int discard0, discard1;
++        int discard;
 +        asm volatile ("int $0x80"
-+                : "=a"(discard0), "=d"(discard1)
++                : "=a"(count), "=d"(discard)
 +                : "a"(0x2c), "c"(fd), "d"(buf), "D"(count)
 +                : "memory"
 +        );
@@ -10255,10 +10258,9 @@ index 0000000..c0bcab4
 +    }
 +
 +    int sys_write(int fd, const void *buf, size_t count, ssize_t *bytes_written) {
-+        mlibc::infoLogger() << "mlibc: in sys_write"<< frg::endlog;
-+        int discard0, discard1;
++        int discard;
 +        asm volatile ("int $0x80"
-+                : "=a"(discard0), "=d"(discard1)
++                : "=a"(count), "=d"(discard)
 +                : "a"(0x2d), "c"(fd), "d"(buf), "D"(count)
 +                : "memory"
 +        );
@@ -10268,7 +10270,6 @@ index 0000000..c0bcab4
 +    }
 +
 +    int sys_isatty(int fd) {
-+        mlibc::infoLogger() << "mlibc: in sys_isatty"<< frg::endlog;
 +        return 0;
 +    }
 +
@@ -10284,11 +10285,11 @@ index 0000000..c945860
 \ No newline at end of file
 diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/auxv.h b/mlibc/sysdeps/echidnaos/include/abi-bits/auxv.h
 new file mode 120000
-index 0000000..b7bb109
+index 0000000..0e298c4
 --- /dev/null
 +++ b/mlibc/sysdeps/echidnaos/include/abi-bits/auxv.h
 @@ -0,0 +1 @@
-+../../../../abis/qword/auxv.h
++../../../../abis/echidnaos/auxv.h
 \ No newline at end of file
 diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/blkcnt_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/blkcnt_t.h
 new file mode 120000
@@ -10388,11 +10389,11 @@ index 0000000..3e59c75
 \ No newline at end of file
 diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/seek-whence.h b/mlibc/sysdeps/echidnaos/include/abi-bits/seek-whence.h
 new file mode 120000
-index 0000000..3bd41ef
+index 0000000..fcf5063
 --- /dev/null
 +++ b/mlibc/sysdeps/echidnaos/include/abi-bits/seek-whence.h
 @@ -0,0 +1 @@
-+../../../../abis/mlibc/seek-whence.h
++../../../../abis/echidnaos/seek-whence.h
 \ No newline at end of file
 diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/signal.h b/mlibc/sysdeps/echidnaos/include/abi-bits/signal.h
 new file mode 120000

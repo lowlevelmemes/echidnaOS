@@ -257,7 +257,7 @@ int general_execute(task_info_t* task_info) {
     }
 
     // debug logging
-
+/*
     kputs("\nNew task startup request completed with:");
     kputs("\npid:         "); kuitoa((uint32_t)new_pid);
     kputs("\nppid:        "); kuitoa((uint32_t)task_table[new_pid]->parent);
@@ -269,7 +269,7 @@ int general_execute(task_info_t* task_info) {
     kputs("\nstdin:       "); kputs(task_table[new_pid]->stdin);
     kputs("\nstdout:      "); kputs(task_table[new_pid]->stdout);
     kputs("\nstderr:      "); kputs(task_table[new_pid]->stderr);
-
+*/
 
     return new_pid;
 }
