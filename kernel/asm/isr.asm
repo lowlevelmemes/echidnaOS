@@ -130,9 +130,11 @@ section .text
 bits 32
 
 handler_simple:
+        jmp $
         iretd
 
 handler_code:
+        jmp $
         add esp, 4
         iretd
 
