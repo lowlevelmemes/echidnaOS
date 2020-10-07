@@ -59,7 +59,10 @@ cd ..
 
 cd mlibc
 git checkout 25eeedab0c0622ac7223b3139c796c955b42e5a6
-cd ..
+cd subprojects
+git clone https://github.com/managarm/cxxshim
+git clone https://github.com/managarm/frigg
+cd ../..
 cp -rv mlibc mlibc-orig
 cd mlibc
 patch -p2 < ../../mlibc.patch
