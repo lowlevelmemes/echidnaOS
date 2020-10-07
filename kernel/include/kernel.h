@@ -68,9 +68,23 @@
 
 #define IO_NOT_READY -5
 
+#define DFUN(X,Y)              (X * 0x1000) + Y
+
+// device categories
+
+#define DC_UNIX                 0
+#define DC_AUDIO                1
+#define DC_PIC                  2
+#define DC_TIMER                3
+
 // device functions
-#define DF_READ                 0
-#define DF_WRITE                1
+
+#define DF_READ                 DFUN(DC_UNIX,0)
+#define DF_WRITE                DFUN(DC_UNIX,1)
+#define DF_BEEP                 DFUN(DC_AUDIO,0)
+#define DF_SET_MASK             DFUN(DC_PIC,0)
+#define DF_GET_MASK             DFUN(DC_PIC,1)
+#define DF_SET_FREQ             DFUN(DC_TIMER,0)    
 
 // signals
 
@@ -430,6 +444,7 @@ void set_PIC0_mask(uint8_t mask);
 void set_PIC1_mask(uint8_t mask);
 uint8_t get_PIC0_mask(void);
 uint8_t get_PIC1_mask(void);
+void init_pic(void);
 
 void set_pit_freq(uint32_t frequency);
 

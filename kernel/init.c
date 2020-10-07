@@ -60,6 +60,7 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     init_com();
     init_stty();
     init_pcspk();
+    init_pic();
 
 
     // ******* END OF DRIVER INITIALISATION CALLS *******

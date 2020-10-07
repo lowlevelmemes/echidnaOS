@@ -42,3 +42,27 @@ uint8_t get_PIC0_mask(void) {
 uint8_t get_PIC1_mask(void) {
     return port_in_b(0xA1);
 }
+
+int pic_io_wrapper(uint32_t dev, uint64_t loc, int type, uint8_t payload) {
+	switch (type) {
+		case DF_GET_MASK:
+			if (dev) {
+				return get_PIC1_mask();
+			} else {
+				return get_PIC0_mask();
+			}
+
+		case DF_SET_MASK:
+			if (dev) {
+				set_PIC1_mask(payload);
+			} else {
+				set_PIC0_mask(payload);
+			}
+			return 0;
+	}
+}
+
+void init_pic(void) {
+	kernel_add_device("i8259:0", 0, 0, &pic_io_wrapper);
+	kernel_add_device("i8259:1", 1, 0, &pic_io_wrapper);
+}
