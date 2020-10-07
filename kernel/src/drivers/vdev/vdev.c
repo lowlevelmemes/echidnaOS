@@ -39,7 +39,7 @@ int vdev_out_ready(int vdev) {
 
 int vdev_io_wrapper(uint32_t vdev, uint64_t unused, int type, uint8_t payload) {
 
-    if (type == 0) {
+    if (type == DF_READ) {
         if (vdevs[vdev].status_out != READY)
             return IO_NOT_READY;
         if (task_table[vdevs[vdev].pid]->status == KRN_STAT_VDEVWAIT_TASK) {
@@ -50,7 +50,7 @@ int vdev_io_wrapper(uint32_t vdev, uint64_t unused, int type, uint8_t payload) {
         vdevs[vdev].status_out = NOT_READY;
         *( (int*)(vdevs[vdev].payload_out_flag + task_table[vdevs[vdev].pid]->base) ) = 1;
         return *( (uint8_t*)(vdevs[vdev].payload_out_addr + task_table[vdevs[vdev].pid]->base) );
-    } else if (type == 1) {
+    } else if (type == DF_WRITE) {
         if (vdevs[vdev].status_in != READY)
             return IO_NOT_READY;
         if (task_table[vdevs[vdev].pid]->status == KRN_STAT_VDEVWAIT_TASK) {

@@ -51,6 +51,7 @@ void kernel_init(struct stivale_struct *stivale_struct) {
 
     kputs("\nInitialising drivers...");
     // ******* DRIVER INITIALISATION CALLS GO HERE *******
+    init_e9();
     init_streams();
     init_initramfs(stivale_struct);
     init_tty_drv();

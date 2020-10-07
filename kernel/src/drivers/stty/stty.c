@@ -17,7 +17,7 @@ static char* devices[MAX_STTY];
 static int is_eof = 0;
 
 int stty_io_wrapper(uint32_t dev, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0) {
+    if (type == DF_READ) {
         if (is_eof) {
             is_eof = 0;
             return -1;
@@ -40,7 +40,7 @@ int stty_io_wrapper(uint32_t dev, uint64_t loc, int type, uint8_t payload) {
         vfs_kwrite(devices[dev], 0, val);
         return val;
     }
-    else if (type == 1) {
+    else if (type == DF_WRITE) {
         switch (payload) {
             case 0x0a:
                 vfs_kwrite(devices[dev], 0, 0x0d);

@@ -204,7 +204,7 @@ int main(int argc, char** argv) {
             else ls_path = s_argv[1];
             for (int i = 0; ; i++) {
                 if (OS_vfs_list(ls_path, &metadata, i) == -2) break;
-                if (metadata.filetype == 1) fputs("\e[36m", stdout);
+                if (metadata.filetype == 0) fputs("\e[36m", stdout);
                 if (metadata.filetype == 2) fputs("\e[33m", stdout);
                 printf("%s", metadata.filename);
                 fputs("\e[37m", stdout);

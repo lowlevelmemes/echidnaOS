@@ -11,10 +11,10 @@ static uint8_t *initramfs;
 int initramfs_io_wrapper(uint32_t dev, uint64_t loc, int type, uint8_t payload) {
     if (loc >= INITRAMFS_SIZE)
         return EOF;
-    if (type == 0) {
+    if (type == DF_READ) {
         return (int)initramfs[loc];
     }
-    else if (type == 1) {
+    else if (type == DF_WRITE) {
         initramfs[loc] = payload;
         return SUCCESS;
     }

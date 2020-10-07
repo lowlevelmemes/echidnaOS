@@ -8,7 +8,7 @@ static int get_freq = 4;
 
 int pcspk_io_wrapper(uint32_t unused0, uint64_t unused1, int type, uint8_t payload) {
 
-    if (type == 1) {
+    if (type == DF_WRITE) {
         
         freq *= 0x100;
         freq += payload;
@@ -37,13 +37,8 @@ int pcspk_io_wrapper(uint32_t unused0, uint64_t unused1, int type, uint8_t paylo
             
         }
         
-    } else if (type == 0) {
-        
-        if (div)
-            return 1;
-        else
-            return 0;
-            
+    } else if (type == DF_READ) {
+        return div;
     }
 
 }

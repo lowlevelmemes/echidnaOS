@@ -39,13 +39,13 @@ com_device init_com_device(uint16_t port);
 #endif
 
 int com_io_wrapper(uint32_t dev, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0) {
+    if (type == DF_READ) {
         if (!(port_in_b(devices[dev].line_stat_reg) & 0x01))
             return IO_NOT_READY;
         else
             return (int)port_in_b(devices[dev].data_reg);
     }
-    else if (type == 1) {
+    else if (type == DF_WRITE) {
         while (!(port_in_b(devices[dev].line_stat_reg) & 0x20));
         port_out_b(devices[dev].data_reg, payload);
         return SUCCESS;

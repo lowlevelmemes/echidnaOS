@@ -72,9 +72,9 @@ int ata_flush_ext(uint32_t disk);
 static ata_device devices[DEVICE_COUNT];
 
 int ata_io_wrapper(uint32_t disk, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0)
+    if (type == DF_READ)
         return ata_read_byte(disk, loc);
-    else if (type == 1)
+    else if (type == DF_WRITE)
         return ata_write_byte(disk, loc, payload);
 }
 

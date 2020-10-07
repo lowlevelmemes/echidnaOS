@@ -1,4 +1,5 @@
 #include <kernel.h>
+#include <cio.h>
 
 void panic(const char *msg) {
     DISABLE_INTERRUPTS;
@@ -7,6 +8,7 @@ void panic(const char *msg) {
     text_disable_cursor(current_tty);
     tty_kputs("\n!!! KERNEL PANIC !!!\n\nError info: ", current_tty);
     tty_kputs(msg, current_tty);
-    tty_kputs("\n\nSYSTEM HALTED", current_tty);
-    asm volatile ("hlt");
+    tty_kputs("\n\nPress F1 to resume execution.\n", current_tty);
+
+    while (port_in_b(0x60) != 0x05);
 }

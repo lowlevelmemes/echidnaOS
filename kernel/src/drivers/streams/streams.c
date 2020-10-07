@@ -4,37 +4,37 @@
 #define EOF -1
 
 int stdin_io_wrapper(uint32_t unused, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0)
+    if (type == DF_READ)
         return vfs_kread(task_table[current_task]->stdin, loc);
-    else if (type == 1)
+    else if (type == DF_WRITE)
         return 0;
 }
 
 int stdout_io_wrapper(uint32_t unused, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0)
+    if (type == DF_READ)
         return 0;
-    else if (type == 1)
+    else if (type == DF_WRITE)
         return vfs_kwrite(task_table[current_task]->stdout, loc, payload);
 }
 
 int stderr_io_wrapper(uint32_t unused, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0)
+    if (type == DF_READ)
         return 0;
-    else if (type == 1)
+    else if (type == DF_WRITE)
         return vfs_kwrite(task_table[current_task]->stderr, loc, payload);
 }
 
 int null_io_wrapper(uint32_t unused, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0)
+    if (type == DF_READ)
         return EOF;
-    else if (type == 1)
+    else if (type == DF_WRITE)
         return 0;
 }
 
 int zero_io_wrapper(uint32_t unused, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0)
+    if (type == DF_READ)
         return '\0';
-    else if (type == 1)
+    else if (type == DF_WRITE)
         return 0;
 }
 

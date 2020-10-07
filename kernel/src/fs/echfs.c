@@ -372,7 +372,7 @@ uint64_t get_free_id(void) {
     entry_t entry;
 
     for (i = 0; (entry = rd_entry(i)).parent_id; i++) {
-        if ((entry.type == 1) && (entry.payload == id))
+        if ((entry.type == DF_WRITE) && (entry.payload == id))
             id = (entry.payload + 1);
     }
     

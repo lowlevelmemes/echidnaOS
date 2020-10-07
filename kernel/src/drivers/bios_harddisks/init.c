@@ -60,10 +60,7 @@ void init_bios_harddisks(void) {
                 continue;
             drive_parameters.drive = j;
             read_drive_parameters(&drive_parameters);
-            if (!drive_parameters.sect_count)
-                continue;
-            else
-                goto found;
+            if (drive_parameters.sect_count) goto found;
         }
         // limit exceeded, return
         return;
@@ -91,9 +88,9 @@ found:
 // when writing it should return 0
 
 int bios_harddisks_io_wrapper(uint32_t disk, uint64_t loc, int type, uint8_t payload) {
-    if (type == 0) {
+    if (type == DF_READ) {
         return bios_harddisk_read((uint8_t)disk, loc);
-    } else if (type == 1) {
+    } else if (type == DF_WRITE) {
         return bios_harddisk_write((uint8_t)disk, loc, payload);
     }
 }

@@ -68,6 +68,10 @@
 
 #define IO_NOT_READY -5
 
+// device functions
+#define DF_READ                 0
+#define DF_WRITE                1
+
 // signals
 
 #define SIGABRT                 0
