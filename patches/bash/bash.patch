@@ -1,0 +1,294 @@
+diff '--color=auto' -urN bash-5.0/builtins/psize.c bash-patched/builtins/psize.c
+--- bash-5.0/builtins/psize.c	2008-08-14 21:56:53.000000000 +0200
++++ bash-patched/builtins/psize.c	2020-10-07 23:49:09.097467689 +0200
+@@ -21,25 +21,12 @@
+ /*  Write output in 128-byte chunks until we get a sigpipe or write gets an
+     EPIPE.  Then report how many bytes we wrote.  We assume that this is the
+     pipe size. */
+-#include <config.h>
+-
+-#if defined (HAVE_UNISTD_H)
+-#  ifdef _MINIX
+-#    include <sys/types.h>
+-#  endif
+-#  include <unistd.h>
+-#endif
+ 
+ #include <stdio.h>
+-#ifndef _MINIX
+-#include "../bashtypes.h"
+-#endif
++#include <stdlib.h>
+ #include <signal.h>
+ #include <errno.h>
+-
+-#include "../command.h"
+-#include "../general.h"
+-#include "../sig.h"
++#include <unistd.h>
+ 
+ #ifndef errno
+ extern int errno;
+@@ -47,7 +34,7 @@
+ 
+ int nw;
+ 
+-sighandler
++void
+ sigpipe (sig)
+      int sig;
+ {
+diff '--color=auto' -urN bash-5.0/lib/readline/terminal.c bash-patched/lib/readline/terminal.c
+--- bash-5.0/lib/readline/terminal.c	2018-10-29 15:56:27.000000000 +0100
++++ bash-patched/lib/readline/terminal.c	2020-10-07 23:50:44.627062074 +0200
+@@ -3,7 +3,7 @@
+ /* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+ 
+    This file is part of the GNU Readline Library (Readline), a library
+-   for reading lines of text with interactive input and history editing.      
++   for reading lines of text with interactive input and history editing.
+ 
+    Readline is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+@@ -104,9 +104,9 @@
+ 
+ #if !defined (__linux__) && !defined (NCURSES_VERSION)
+ #  if defined (__EMX__) || defined (NEED_EXTERN_PC)
+-extern 
++extern
+ #  endif /* __EMX__ || NEED_EXTERN_PC */
+-char PC, *BC, *UP;
++extern char PC, *BC, *UP;
+ #endif /* !__linux__ && !NCURSES_VERSION */
+ 
+ /* Some strings to control terminal actions.  These are output by tputs (). */
+@@ -361,7 +361,7 @@
+ {
+   _rl_get_screen_size (fileno (rl_instream), 1);
+ }
+-	
++
+ void
+ rl_resize_terminal (void)
+ {
+diff '--color=auto' -urN bash-5.0/lib/sh/getcwd.c bash-patched/lib/sh/getcwd.c
+--- bash-5.0/lib/sh/getcwd.c	2012-03-10 16:48:50.000000000 +0100
++++ bash-patched/lib/sh/getcwd.c	2020-10-07 23:49:09.100801022 +0200
+@@ -20,7 +20,8 @@
+ 
+ #include <config.h>
+ 
+-#if !defined (HAVE_GETCWD)
++#if 0
++!defined (HAVE_GETCWD)
+ 
+ #if !defined (__GNUC__) && !defined (HAVE_ALLOCA_H) && defined (_AIX)
+   #pragma alloca
+@@ -94,7 +95,7 @@
+   return (st.st_ino == thisino);
+ }
+ #endif
+-    
++
+ /* Get the pathname of the current working directory,
+    and put it in SIZE bytes of BUF.  Returns NULL if the
+    directory couldn't be determined or SIZE was too small.
+diff '--color=auto' -urN bash-5.0/lib/sh/getenv.c bash-patched/lib/sh/getenv.c
+--- bash-5.0/lib/sh/getenv.c	2018-07-09 16:14:46.000000000 +0200
++++ bash-patched/lib/sh/getenv.c	2020-10-07 23:49:09.100801022 +0200
+@@ -21,7 +21,8 @@
+ 
+ #include <config.h>
+ 
+-#if defined (CAN_REDEFINE_GETENV)
++#if 0
++defined (CAN_REDEFINE_GETENV)
+ 
+ #if defined (HAVE_UNISTD_H)
+ #  include <unistd.h>
+diff '--color=auto' -urN bash-5.0/lib/termcap/termcap.c bash-patched/lib/termcap/termcap.c
+--- bash-5.0/lib/termcap/termcap.c	2015-08-06 16:17:08.000000000 +0200
++++ bash-patched/lib/termcap/termcap.c	2020-10-07 23:49:09.100801022 +0200
+@@ -627,7 +627,7 @@
+   bufp->ateof = 0;
+   *bufp->ptr = '\0';
+ 
+-  lseek (fd, 0L, 0);
++  lseek (fd, 0L, SEEK_SET);
+ 
+   while (!bufp->ateof)
+     {
+diff '--color=auto' -urN bash-5.0/mksyntax.c bash-patched/mksyntax.c
+--- bash-5.0/mksyntax.c	2012-07-30 01:48:38.000000000 +0200
++++ bash-patched/mksyntax.c	2020-10-07 23:49:09.100801022 +0200
+@@ -20,16 +20,12 @@
+    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+-#include "config.h"
+-
+ #include <stdio.h>
++#include <string.h>
+ #include "bashansi.h"
+ #include "chartypes.h"
+ #include <errno.h>
+-
+-#ifdef HAVE_UNISTD_H
+-#  include <unistd.h>
+-#endif
++#include <unistd.h>
+ 
+ #include "syntax.h"
+ 
+@@ -40,9 +36,7 @@
+ extern int errno;
+ #endif
+ 
+-#ifndef HAVE_STRERROR
+ extern char *strerror();
+-#endif
+ 
+ struct wordflag {
+ 	int	flag;
+@@ -375,41 +369,3 @@
+     fclose (fp);
+   exit (0);
+ }
+-
+-
+-#if !defined (HAVE_STRERROR)
+-
+-#include <bashtypes.h>
+-#if defined (HAVE_SYS_PARAM_H)
+-#  include <sys/param.h>
+-#endif
+-
+-#if defined (HAVE_UNISTD_H)
+-#  include <unistd.h>
+-#endif
+-
+-/* Return a string corresponding to the error number E.  From
+-   the ANSI C spec. */
+-#if defined (strerror)
+-#  undef strerror
+-#endif
+-
+-char *
+-strerror (e)
+-     int e;
+-{
+-  static char emsg[40];
+-#if defined (HAVE_SYS_ERRLIST)
+-  extern int sys_nerr;
+-  extern char *sys_errlist[];
+-
+-  if (e > 0 && e < sys_nerr)
+-    return (sys_errlist[e]);
+-  else
+-#endif /* HAVE_SYS_ERRLIST */
+-    {
+-      sprintf (emsg, "Unknown system error %d", e);
+-      return (&emsg[0]);
+-    }
+-}
+-#endif /* HAVE_STRERROR */
+diff '--color=auto' -urN bash-5.0/shell.c bash-patched/shell.c
+--- bash-5.0/shell.c	2018-12-06 17:28:21.000000000 +0100
++++ bash-patched/shell.c	2020-10-07 23:49:09.100801022 +0200
+@@ -1590,7 +1590,7 @@
+ #endif
+ 
+   /* Only do this with non-tty file descriptors we can seek on. */
+-  if (fd_is_tty == 0 && (lseek (fd, 0L, 1) != -1))
++  if (fd_is_tty == 0 && (lseek (fd, 0L, SEEK_CUR) != -1))
+     {
+       /* Check to see if the `file' in `bash file' is a binary file
+ 	 according to the same tests done by execute_simple_command (),
+@@ -1627,7 +1627,7 @@
+ 	  exit (EX_BINARY_FILE);
+ 	}
+       /* Now rewind the file back to the beginning. */
+-      lseek (fd, 0L, 0);
++      lseek (fd, 0L, SEEK_SET);
+     }
+ 
+   /* Open the script.  But try to move the file descriptor to a randomly
+diff '--color=auto' -urN bash-5.0/support/bashversion.c bash-patched/support/bashversion.c
+--- bash-5.0/support/bashversion.c	2008-09-09 15:31:53.000000000 +0200
++++ bash-patched/support/bashversion.c	2020-10-07 23:49:09.100801022 +0200
+@@ -18,15 +18,12 @@
+    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+-#include "config.h"
+-
+ #include "stdc.h"
+ 
+ #include <stdio.h>
++#include <string.h>
+ 
+-#if defined (HAVE_UNISTD_H)
+-#  include <unistd.h>
+-#endif
++#include <unistd.h>
+ 
+ #include "bashansi.h"
+ 
+diff '--color=auto' -urN bash-5.0/support/config.sub bash-patched/support/config.sub
+--- bash-5.0/support/config.sub	2018-11-16 21:34:44.000000000 +0100
++++ bash-patched/support/config.sub	2020-10-07 23:49:09.100801022 +0200
+@@ -1360,7 +1360,7 @@
+ 	     | powermax* | dnix* | nx6 | nx7 | sei* | dragonfly* \
+ 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+-	     | midnightbsd*)
++	     | midnightbsd* | echidnaos*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	qnx*)
+diff '--color=auto' -urN bash-5.0/support/man2html.c bash-patched/support/man2html.c
+--- bash-5.0/support/man2html.c	2018-09-20 17:17:26.000000000 +0200
++++ bash-patched/support/man2html.c	2020-10-07 23:49:09.100801022 +0200
+@@ -63,7 +63,7 @@
+  *    time to look through all the available manpages.)
+  */
+ #ifdef HAVE_CONFIG_H
+-#include <config.h>
++//#include <config.h>
+ #endif
+ 
+ #define NROFF 0
+@@ -123,7 +123,8 @@
+ #define BD_LITERAL  1
+ #define BD_INDENT   2
+ 
+-#ifndef HAVE_STRERROR
++//#ifndef HAVE_STRERROR
++#if (0)
+ static char *
+ strerror(int e)
+ {
+diff '--color=auto' -urN bash-5.0/support/mksignames.c bash-patched/support/mksignames.c
+--- bash-5.0/support/mksignames.c	2009-10-08 16:36:34.000000000 +0200
++++ bash-patched/support/mksignames.c	2020-10-07 23:49:09.104134356 +0200
+@@ -19,8 +19,6 @@
+    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+-#include <config.h>
+-
+ #include <sys/types.h>
+ #include <signal.h>
+ 
+diff '--color=auto' -urN bash-5.0/support/signames.c bash-patched/support/signames.c
+--- bash-5.0/support/signames.c	2013-10-14 15:31:27.000000000 +0200
++++ bash-patched/support/signames.c	2020-10-07 23:49:09.104134356 +0200
+@@ -18,8 +18,6 @@
+    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+-#include <config.h>
+-
+ #include <stdio.h>
+ 
+ #include <sys/types.h>

@@ -1,8 +1,12 @@
 /limine
+/build
+/ports
 /**/*.img
 /**/*.o
 /**/*.elf
 /**/*.bin
+/mlibc
+/mlibc.tar.gz
 /shell/sh
 /bochsout.txt
 /root

@@ -5,9 +5,6 @@ ar = 'i686-echidnaos-ar'
 strip = 'i686-echidnaos-strip'
 pkgconfig = 'pkg-config'
 
-[properties]
-root = '@@sysroot@@'
-
 [host_machine]
 system = 'echidnaos'
 cpu_family = 'x86'

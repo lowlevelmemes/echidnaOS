@@ -1,0 +1,207 @@
+sources:
+  - name: binutils
+    subdir: 'ports'
+    url: 'https://ftp.gnu.org/gnu/binutils/binutils-2.35.tar.xz'
+    format: 'tar.xz'
+    extract_path: 'binutils-2.35'
+    patch-path-strip: 1
+    tools_required:
+      - host-autoconf-v2.69
+      - host-automake-v1.15
+    regenerate:
+      - args: ['automake']
+        workdir: '@THIS_SOURCE_DIR@/ld'
+
+  - name: gcc
+    subdir: 'ports'
+    url: 'https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz'
+    format: 'tar.xz'
+    extract_path: 'gcc-10.2.0'
+    patch-path-strip: 1
+    tools_required:
+      - host-autoconf-v2.69
+      - host-automake-v1.15
+    regenerate:
+      - args: ['./contrib/download_prerequisites']
+        workdir: '@THIS_SOURCE_DIR@'
+      - args: ['autoconf']
+        workdir: '@THIS_SOURCE_DIR@/libstdc++-v3'
+
+  - name: mlibc
+    url: 'https://github.com/managarm/mlibc/archive/25eeedab0c0622ac7223b3139c796c955b42e5a6.tar.gz'
+    format: 'tar.gz'
+    extract_path: 'mlibc-25eeedab0c0622ac7223b3139c796c955b42e5a6'
+    patch-path-strip: 2
+
+tools:
+  - name: host-autoconf-v2.69
+    source:
+      name: autoconf-v2.69
+      subdir: 'ports'
+      url: 'https://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.xz'
+      format: 'tar.xz'
+      extract_path: 'autoconf-2.69'
+    configure:
+      - args:
+        - '@THIS_SOURCE_DIR@/configure'
+        - '--prefix=@PREFIX@'
+    compile:
+      - args: ['make', '-j@PARALLELISM@']
+    install:
+      - args: ['make', 'install']
+
+  - name: host-automake-v1.15
+    source:
+      name: automake-v1.15
+      subdir: 'ports'
+      url: 'https://ftp.gnu.org/gnu/automake/automake-1.15.1.tar.xz'
+      format: 'tar.xz'
+      extract_path: 'automake-1.15.1'
+    configure:
+      - args:
+        - '@THIS_SOURCE_DIR@/configure'
+        - '--prefix=@PREFIX@'
+    compile:
+      - args: ['make', '-j@PARALLELISM@']
+    install:
+      - args: ['make', 'install']
+
+  - name: host-binutils
+    from_source: binutils
+    configure:
+      - args:
+        - '@THIS_SOURCE_DIR@/configure'
+        - '--prefix=@PREFIX@'
+        - '--target=i686-echidnaos'
+        - '--with-sysroot=@SYSROOT_DIR@'
+        - '--disable-nls'
+        - '--disable-werror'
+        - 'CFLAGS=-O2 -pipe'
+    compile:
+      - args: ['make', '-j@PARALLELISM@']
+    install:
+      - args: ['make', 'install']
+
+  - name: host-gcc
+    from_source: gcc
+    tools_required:
+      - tool: host-binutils
+        recursive: true
+    configure:
+      - args:
+        - '@THIS_SOURCE_DIR@/configure'
+        - '--prefix=@PREFIX@'
+        - '--target=i686-echidnaos'
+        - '--with-sysroot=@SYSROOT_DIR@'
+        - '--disable-nls'
+        - '--disable-multilib'
+        - '--disable-gcov'
+        - '--disable-shared'
+        - '--enable-languages=c,c++'
+        - '--enable-initfini-array'
+        - 'CFLAGS=-O2 -pipe'
+        - 'CXXFLAGS=-O2 -pipe'
+    stages:
+      - name: compiler
+        pkgs_required:
+          - mlibc-headers
+        compile:
+          - args: ['make', '-j@PARALLELISM@', 'all-gcc']
+          # GCC does *not* look for target-prefixed LD/AS.
+          # Instead, it searches a list of prefix directories. Link AS/LD to make it happy.
+          - args: ['mkdir', '-p', '@PREFIX@/i686-echidnaos/bin']
+          - args: ['ln', '-sf', '../../../host-binutils/i686-echidnaos/bin/as',
+                               '@PREFIX@/i686-echidnaos/bin/as']
+          - args: ['ln', '-sf', '../../../host-binutils/i686-echidnaos/bin/ld',
+                               '@PREFIX@/i686-echidnaos/bin/ld']
+        install:
+          - args: ['make', 'install-gcc']
+      - name: libgcc
+        tools_required:
+          - tool: host-gcc
+            stage_dependencies: [compiler]
+        pkgs_required:
+          - mlibc
+        compile:
+          - args: ['make', '-j@PARALLELISM@', 'all-target-libgcc']
+        install:
+          - args: ['make', 'install-target-libgcc']
+      - name: libstdc++
+        tools_required:
+          - tool: host-gcc
+            stage_dependencies: [libgcc]
+        compile:
+          - args: ['make', '-j@PARALLELISM@', 'all-target-libstdc++-v3']
+        install:
+          - args: ['make', 'install-target-libstdc++-v3']
+
+packages:
+  - name: mlibc-headers
+    from_source: mlibc
+    implict_package: true
+    configure:
+      - args:
+        - 'meson'
+        - '--cross-file'
+        - '@SOURCE_ROOT@/cross_file.txt'
+        - '--prefix=/usr'
+        - '-Dheaders_only=true'
+        - '@THIS_SOURCE_DIR@'
+    build:
+      - args: ['ninja']
+      - args: ['ninja', 'install']
+        environ:
+          DESTDIR: '@THIS_COLLECT_DIR@'
+
+  - name: mlibc
+    from_source: mlibc
+    tools_required:
+      - tool: host-gcc
+        stage_dependencies: [compiler]
+    implict_package: true
+    pkgs_required:
+      - mlibc-headers
+    configure:
+      - args:
+        - 'meson'
+        - '--cross-file'
+        - '@SOURCE_ROOT@/cross_file.txt'
+        - '--prefix=/usr'
+        - '--libdir=lib'
+        - '--buildtype=debugoptimized'
+        - '-Dstatic=true'
+        - '-Dmlibc_no_headers=true'
+        - '@THIS_SOURCE_DIR@'
+    build:
+      - args: ['ninja']
+      - args: ['ninja', 'install']
+        environ:
+          DESTDIR: '@THIS_COLLECT_DIR@'
+
+  - name: bash
+    source:
+      subdir: 'ports'
+      url: 'https://ftp.gnu.org/gnu/bash/bash-5.0.tar.gz'
+      format: 'tar.gz'
+      extract_path: 'bash-5.0'
+      patch-path-strip: 1
+      tools_required:
+        - host-autoconf-v2.69
+        - host-automake-v1.15
+      regenerate:
+        # While we do not need to regenerate the configure script, we need to touch it
+        # after patching config.sub so that make does not try to regenerate it.
+        - args: ['autoconf']
+    tools_required:
+      - host-gcc
+    configure:
+      - args:
+        - '@THIS_SOURCE_DIR@/configure'
+        - '--host=i686-echidnaos'
+        - '--prefix=/usr'
+        - '--enable-static-link'
+        - '--without-bash-malloc'
+        - '--disable-nls'
+    build:
+      - args: ['make', '-j@PARALLELISM@']
+      - args: ['make', 'DESTDIR=@THIS_COLLECT_DIR@', 'install']
