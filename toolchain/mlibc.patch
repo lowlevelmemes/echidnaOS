@@ -10143,10 +10143,10 @@ index 0000000..282953f
 +
 diff --git a/mlibc/sysdeps/echidnaos/generic/generic.cpp b/mlibc/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
-index 0000000..2f7803d
+index 0000000..dad96c2
 --- /dev/null
 +++ b/mlibc/sysdeps/echidnaos/generic/generic.cpp
-@@ -0,0 +1,128 @@
+@@ -0,0 +1,161 @@
 +
 +#include <bits/ensure.h>
 +#include <mlibc/debug.hpp>
@@ -10223,12 +10223,45 @@ index 0000000..2f7803d
 +    int sys_futex_wake(int *pointer) STUB_ONLY
 +
 +    // Task functions
-+    void sys_exit(int status) STUB_ONLY
++    void sys_exit(int status) {
++        int discard;
++
++        asm volatile ("int $0x80"
++                : "=a"(discard)
++                : "a"(0x00), "c"(status)
++                : "edx", "memory"
++        );
++    }
++
 +    int sys_tcb_set(void *pointer) STUB_ONLY
 +
 +    // File functions
-+    int sys_open(const char *path, int flags, int *fd) STUB_ONLY
-+    int sys_close(int fd) STUB_ONLY
++    int sys_open(const char *path, int flags, int *fd) {
++        int discard;
++        int ret;
++
++        asm volatile ("int $0x80"
++                : "=a"(ret), "=d"(discard)
++                : "a"(0x2a), "c"(path), "d"(flags), "D"(0)
++                : "memory"
++        );
++
++        *fd = ret;
++
++        return 0;
++    }
++
++    int sys_close(int fd) {
++        int ret;
++
++        asm volatile ("int $0x80"
++                : "=a"(ret)
++                : "a"(0x2b), "c"(fd)
++                : "edx", "memory"
++        );
++
++        return ret;
++    }
 +
 +    int sys_seek(int fd, off_t offset, int whence, off_t *new_offset) {
 +        int discard;
