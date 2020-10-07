@@ -1,5 +1,5 @@
-CC = i386-echidnaos-gcc
-PREFIX = 
+CC = i686-echidnaos-gcc
+PREFIX =
 
 C_FILES = shell.c
 OBJ_FILES = $(C_FILES:.c=.o)

@@ -1,4 +1,4 @@
-PATH := $(shell pwd)/toolchain/bin:$(PATH)
+PATH := $(shell pwd)/cross-root/bin:$(PATH)
 
 .PHONY: all clean run
 
@@ -9,7 +9,7 @@ limine/limine-install:
 	cd limine && $(MAKE) limine-install
 
 run:
-	qemu-system-x86_64 -net none -enable-kvm -cpu host -hda echidna.img -m 2G
+	qemu-system-x86_64 -net none -enable-kvm -cpu host -hda echidna.img -m 2G -soundhw pcspk -debugcon stdio
 
 shell/sh: shell/shell.c
 	$(MAKE) -C shell

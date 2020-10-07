@@ -47,14 +47,14 @@ int main(int argc, char** argv) {
     int s_argc;
     char* s_argv[128];
     char pwd[2048];
-    
+
     int c;
     uint64_t i;
-    
+
     vfs_metadata_t metadata = {0};
 
     for (;;) {
-        printf("\e[32mechidnaOS\e[37m:\e[36m%s\e[37m# ", getwd(pwd));
+        printf("\e[32mechidnaOS\e[37m:\e[36m%s\e[37m# ", getcwd(pwd, 2048));
         fflush(stdout);
 
         fgets(input, 256, stdin);
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 
         else if (!strcmp("col", s_argv[0]))
             puts("\e[40m \e[41m \e[42m \e[43m \e[44m \e[45m \e[46m \e[47m \e[40m");
-        
+
         else if (!strcmp("vdev", s_argv[0])) {
             if (vdev_reg) {
                 puts("vdev already registered");
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
             printf("vdev%d registered successfully\n", vdev);
             continue;
         }
-        
+
         else if (!strcmp("vdevin", s_argv[0])) {
             if (!vdev_reg) {
                 puts("vdev not registered");
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
             printf("activity on vdev%d: `%c`\n", vdevw, (char)vdev_in);
             continue;
         }
-        
+
         else if (!strcmp("vdevout", s_argv[0])) {
             if (s_argc == 1) continue;
             if (!vdev_reg) {
@@ -110,11 +110,11 @@ int main(int argc, char** argv) {
             printf("activity on vdev%d\n", vdevw);
             continue;
         }
-        
+
         else if (!strcmp("pid", s_argv[0])) {
             printf("pid: %d\n", OS_getpid());
         }
-        
+
         else if (!strcmp("read", s_argv[0])) {
             char buf[6] = {0};
             if (s_argc == 1) continue;
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
             else
                 printf("handle closed\n");
         }
-        
+
         else if (!strcmp("write", s_argv[0])) {
             char buf[6] = "12345";
             if (s_argc == 1) continue;
@@ -148,42 +148,42 @@ int main(int argc, char** argv) {
             else
                 printf("handle closed\n");
         }
-        
+
         else if (!strcmp("div0", s_argv[0])) {/*
             int a = 0;
             a = a / 0;
 */        }
-        
+
         else if (!strcmp("esc", s_argv[0])) {
             if (s_argc == 1) continue;
             putchar('\e');
             fputs(s_argv[1], stdout);
         }
-        
+
         else if (!strcmp("mkdir", s_argv[0])) {
             if (s_argc == 1) continue;
             if (OS_vfs_mkdir(s_argv[1], 0))
                 fprintf(stderr, "couldn't create directory `%s`.\n", s_argv[1]);
         }
-        
+
         else if (!strcmp("touch", s_argv[0])) {
             if (s_argc == 1) continue;
             if (OS_vfs_create(s_argv[1], 0))
                 fprintf(stderr, "couldn't create file `%s`.\n", s_argv[1]);
         }
-        
+
         else if (!strcmp("rm", s_argv[0])) {
             if (s_argc == 1) continue;
             if (OS_vfs_remove(s_argv[1]))
                 fprintf(stderr, "couldn't remove file `%s`.\n", s_argv[1]);
         }
-        
+
         else if (!strcmp("clear", s_argv[0])) {
             fputs("\e[2J\e[H", stdout);
         }
-        
+
         else if (!strcmp("fork", s_argv[0])) {
-            
+
             pid_t pid = fork();
 
             if (pid == -1) {
@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
             }
 
         }
-        
+
         else if (!strcmp("ls", s_argv[0])) {
             char* ls_path;
             if (s_argc == 1) ls_path = pwd;
@@ -211,15 +211,15 @@ int main(int argc, char** argv) {
                 putchar('\n');
             }
         }
-        
+
         else if (!strcmp("beep", s_argv[0])) {
             if (s_argc == 1) continue;
             OS_vfs_write("/dev/pcspk", 0, atoi(s_argv[1]));
         }
-        
+
         else if (!strcmp("rdspk", s_argv[0]))
             printf("%d\n", OS_vfs_read("/dev/pcspk", 0));
-        
+
         else if (!strcmp("send", s_argv[0])) {
             char server[] = "server";
             uint32_t pid = OS_ipc_resolve_name(server);
@@ -227,9 +227,9 @@ int main(int argc, char** argv) {
             printf("payload is: %s\n", s_argv[1]);
             OS_ipc_send_packet(pid, s_argv[1], strlen(s_argv[1]) + 1);
         }
-        
+
         else if (!strcmp("exit", s_argv[0])) return 0;
-        
+
         else if (!strcmp("dump", s_argv[0])) {
             FILE* fp;
             if (s_argc == 1) continue;
@@ -242,7 +242,7 @@ int main(int argc, char** argv) {
             printf("\nFile length: %d\n", (int)ftell(fp));
             fclose(fp);
         }
-        
+
         else if (!strcmp("size", s_argv[0])) {
             FILE* fp;
             if (s_argc == 1) continue;
@@ -254,7 +254,7 @@ int main(int argc, char** argv) {
             printf("\nFile length: %d\n", (int)ftell(fp));
             fclose(fp);
         }
-        
+
         else if (!strcmp("dumpr", s_argv[0])) {
             FILE* src;
             FILE* dest;
@@ -272,7 +272,7 @@ int main(int argc, char** argv) {
             fclose(dest);
             continue;
         }
-        
+
         else if (!strcmp("cd", s_argv[0])) {
             if (s_argc == 1) continue;
             if (OS_vfs_cd(s_argv[1]) == -2)
@@ -301,14 +301,14 @@ int main(int argc, char** argv) {
             }
         }
     }
-    
+
     return 0;
 }
 
 int get_argc(const char* string) {
     uint32_t index=0;
     int argc=0;
-    
+
     while (string[index]) {
         if (string[index] == ' ') {
             index++;
@@ -345,13 +345,13 @@ int get_argc(const char* string) {
 void get_argv(char** argv, char* string) {
     uint32_t index=0;
     uint8_t arg=0;
-    
+
     no_block = 0;
-    
+
     OS_what_stdin(prog_stdin);
     OS_what_stdout(prog_stdout);
     OS_what_stderr(prog_stderr);
-    
+
     while (string[index]) {
         if (string[index] == ' ') {
             string[index++] = 0;
@@ -454,10 +454,10 @@ void get_argv(char** argv, char* string) {
             no_block = 1;
             continue;
         }
-        
+
         // point the argv argument
         argv[arg++] = &string[index];
-        
+
         // skip over string and set 0 terminator
         while ((string[index] != ' ') && (string[index]))
             index++;

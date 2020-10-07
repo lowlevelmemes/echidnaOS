@@ -1,0 +1,117 @@
+diff '--color=auto' -urN binutils-2.35/bfd/config.bfd binutils-2.35-patched/bfd/config.bfd
+--- binutils-2.35/bfd/config.bfd	2020-07-24 11:12:19.000000000 +0200
++++ binutils-2.35-patched/bfd/config.bfd	2020-10-06 02:23:32.208658270 +0200
+@@ -722,6 +722,10 @@
+     targ_defvec=i386_elf32_vec
+     targ_selvecs="iamcu_elf32_vec i386_pe_vec i386_pei_vec"
+     ;;
++  i[3-7]86-*-echidnaos*)
++    targ_defvec=i386_elf32_vec
++    targ_selvecs=
++    ;;
+   i[3-7]86-*-interix*)
+     targ_defvec=i386_pei_vec
+     targ_selvecs="i386_pe_vec"
+diff '--color=auto' -urN binutils-2.35/config.sub binutils-2.35-patched/config.sub
+--- binutils-2.35/config.sub	2020-07-24 11:12:19.000000000 +0200
++++ binutils-2.35-patched/config.sub	2020-10-06 02:24:27.305323155 +0200
+@@ -1366,7 +1366,7 @@
+ 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+-	     | nsk* | powerunix)
++	     | nsk* | powerunix | echidnaos*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	qnx*)
+diff '--color=auto' -urN binutils-2.35/gas/configure.tgt binutils-2.35-patched/gas/configure.tgt
+--- binutils-2.35/gas/configure.tgt	2020-07-24 11:12:19.000000000 +0200
++++ binutils-2.35-patched/gas/configure.tgt	2020-10-06 02:25:40.551987467 +0200
+@@ -218,6 +218,7 @@
+   i386-*-beos*)				fmt=elf ;;
+   i386-*-elfiamcu)			fmt=elf arch=iamcu ;;
+   i386-*-elf*)				fmt=elf ;;
++  i386-*-echidnaos*)		fmt=elf ;;
+   i386-*-fuchsia*)			fmt=elf ;;
+   i386-*-bsd*)				fmt=aout em=386bsd ;;
+   i386-*-netbsdpe*)			fmt=coff em=pe ;;
+diff '--color=auto' -urN binutils-2.35/ld/Makefile.am binutils-2.35-patched/ld/Makefile.am
+--- binutils-2.35/ld/Makefile.am	2020-07-24 11:12:20.000000000 +0200
++++ binutils-2.35-patched/ld/Makefile.am	2020-10-06 02:34:55.272138252 +0200
+@@ -286,6 +286,7 @@
+ 	eelf_i386_ldso.c \
+ 	eelf_i386_sol2.c \
+ 	eelf_i386_vxworks.c \
++	eelf_i386_echidnaos.c \
+ 	eelf_iamcu.c \
+ 	eelf_s390.c \
+ 	eh8300elf.c \
+@@ -772,6 +773,7 @@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_ldso.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_sol2.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_vxworks.Pc@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_echidnaos.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_iamcu.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_s390.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eh8300elf.Pc@am__quote@
+diff '--color=auto' -urN binutils-2.35/ld/configure.tgt binutils-2.35-patched/ld/configure.tgt
+--- binutils-2.35/ld/configure.tgt	2020-07-24 11:12:20.000000000 +0200
++++ binutils-2.35-patched/ld/configure.tgt	2020-10-06 02:32:14.042143477 +0200
+@@ -319,6 +319,9 @@
+ i[3-7]86-*-bsdi*)	targ_emul=i386bsd
+ 			targ_extra_ofiles=
+ 			;;
++i[3-7]86-*-echidnaos*) targ_emul=elf_i386_echidnaos
++			targ_extra_emuls=elf_i386
++			;;
+ i[3-7]86-*-linux-*)	targ_emul=elf_i386
+ 			targ_extra_emuls="elf_iamcu"
+ 			targ64_extra_emuls="elf_x86_64 elf32_x86_64 elf_l1om elf_k1om"
+diff '--color=auto' -urN binutils-2.35/ld/emulparams/elf_i386_echidnaos.sh binutils-2.35-patched/ld/emulparams/elf_i386_echidnaos.sh
+--- binutils-2.35/ld/emulparams/elf_i386_echidnaos.sh	1970-01-01 01:00:00.000000000 +0100
++++ binutils-2.35-patched/ld/emulparams/elf_i386_echidnaos.sh	2020-10-06 02:30:53.082146103 +0200
+@@ -0,0 +1,3 @@
++. ${srcdir}/emulparams/elf_i386.sh
++SCRIPT_NAME=i386echidnaos
++TEXT_START_ADDR=0x10000
+diff '--color=auto' -urN binutils-2.35/ld/scripttempl/i386echidnaos.sc binutils-2.35-patched/ld/scripttempl/i386echidnaos.sc
+--- binutils-2.35/ld/scripttempl/i386echidnaos.sc	1970-01-01 01:00:00.000000000 +0100
++++ binutils-2.35-patched/ld/scripttempl/i386echidnaos.sc	2020-10-06 02:30:53.082146103 +0200
+@@ -0,0 +1,37 @@
++cat <<EOF
++
++ENTRY(_start)
++
++SECTIONS {
++    . = 0x10000;
++
++    .text ALIGN(4K) : {
++        KEEP(*(.echidnaos_entry))
++        *(.text*)
++    }
++
++    .rodata ALIGN(4K) : {
++        *(.rodata*)
++    }
++
++    .got ALIGN(4K) : {
++        _GLOBAL_OFFSET_TABLE_ = .;
++        KEEP(*(.got*))
++    }
++
++    .init_array ALIGN(4K) : {
++        __init_array_start = .;
++        KEEP(*(.init_array*))
++        __init_array_end = .;
++    }
++
++    .data ALIGN(4K) : {
++        *(.data*)
++        . = ALIGN(4K);
++        *(.bss*)
++        . = ALIGN(4K);
++        *(COMMON)
++    }
++}
++
++EOF

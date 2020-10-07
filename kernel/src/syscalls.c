@@ -1,5 +1,12 @@
 #include <stdint.h>
 #include <kernel.h>
+#include <cio.h>
+
+void syscall_log(const char *msg) {
+    msg += task_table[current_task]->base;
+    kputs(msg);
+    kputs("\n");
+}
 
 int lseek(int handle, int offset, int type) {
 
@@ -12,13 +19,13 @@ int lseek(int handle, int offset, int type) {
 
     if (handle >= task_table[current_task]->file_handles_ptr)
         return -1;
-    
+
     if (task_table[current_task]->file_handles[handle].free)
         return -1;
-    
+
     if (task_table[current_task]->file_handles[handle].isblock)
         return -1;
-        
+
     switch (type) {
         case SEEK_SET:
             if ((task_table[current_task]->file_handles[handle].begin + offset) > task_table[current_task]->file_handles[handle].end ||
@@ -50,18 +57,18 @@ int read(int handle, char* ptr, int len) {
 
     /*
     ptr += task_table[current_task]->base;
-    
+
     read_stat = 0;
-    
+
     if (handle < 0)
         return -1;
 
     if (handle >= task_table[current_task]->file_handles_ptr)
         return -1;
-    
+
     if (task_table[current_task]->file_handles[handle].free)
         return -1;
-        
+
     if (task_table[current_task]->file_handles[handle].flags & O_WRONLY)
         return -1;
 
@@ -83,7 +90,7 @@ int read(int handle, char* ptr, int len) {
         task_table[current_task]->file_handles[handle].ptr++;
         *(ptr++) = (char)c;
     }
-    
+
     return i;
     */
 
@@ -98,18 +105,18 @@ int write(int handle, char* ptr, int len) {
 
     /*
     ptr += task_table[current_task]->base;
-    
+
     write_stat = 0;
-    
+
     if (handle < 0)
         return -1;
 
     if (handle >= task_table[current_task]->file_handles_ptr)
         return -1;
-    
+
     if (task_table[current_task]->file_handles[handle].free)
         return -1;
-        
+
     if (task_table[current_task]->file_handles[handle].flags & O_RDONLY)
         return -1;
 
@@ -128,7 +135,7 @@ int write(int handle, char* ptr, int len) {
                 task_table[current_task]->file_handles[handle].end++;
         task_table[current_task]->file_handles[handle].ptr++;
     }
-    
+
     return i;
     */
 
@@ -141,7 +148,7 @@ int open(char* path, int flags, int mode) {
 
     /*
     vfs_metadata_t metadata;
-    
+
     path += task_table[current_task]->base;
 
     if ( vfs_kget_metadata(path, &metadata, FILE_TYPE) == -2
@@ -201,18 +208,18 @@ int close(int handle) {
     /*
     if (handle < 0)
         return -1;
-        
+
     if (handle >= task_table[current_task]->file_handles_ptr)
         return -1;
-    
+
     if (task_table[current_task]->file_handles[handle].free)
         return -1;
-    
+
     task_table[current_task]->file_handles[handle].free = 1;
-    
+
     return 0;
     */
-    
+
 }
 
 uint32_t signal(int sig, uint32_t handler) {
@@ -268,10 +275,10 @@ void ipc_send_packet(uint32_t pid, char* payload, uint32_t len) {
         tty_kputs("\nTask terminated.\n", 0);
         task_quit(current_task, -1);
     }
-    
+
     payload += task_table[current_task]->base;
     task_table[pid]->ipc_queue = krealloc(task_table[pid]->ipc_queue, (task_table[pid]->ipc_queue_ptr + 1) * sizeof(ipc_packet_t));
-    
+
     task_table[pid]->ipc_queue[task_table[pid]->ipc_queue_ptr].payload = kalloc(len);
     kmemcpy(task_table[pid]->ipc_queue[task_table[pid]->ipc_queue_ptr].payload, payload, len);
 
@@ -327,19 +334,19 @@ uint32_t ipc_read_packet(char* payload) {
     payload += task_table[current_task]->base;
 
     kmemcpy(payload, task_table[current_task]->ipc_queue[0].payload, task_table[current_task]->ipc_queue[0].length);
-            
+
     kfree(task_table[current_task]->ipc_queue[0].payload);
 
     uint32_t pid = task_table[current_task]->ipc_queue[0].sender;
-    
+
     // push the queue back
     for (uint32_t i = (task_table[current_task]->ipc_queue_ptr - 1); i; i--)
         task_table[pid]->ipc_queue[i-1] = task_table[pid]->ipc_queue[i];
-    
+
     // free queue entry
     task_table[current_task]->ipc_queue = krealloc(task_table[current_task]->ipc_queue,
                                           --task_table[current_task]->ipc_queue_ptr * sizeof(ipc_packet_t));
-    
+
     return pid;
 }
 
@@ -361,13 +368,13 @@ int resize_heap(uint32_t heap_size) {
     if (!new_ptr) return -1;
     task_table[current_task]->base = new_ptr;
     task_table[current_task]->pages = (task_table[current_task]->heap_base / PAGE_SIZE) + heap_pages;
-    
+
     task_table[current_task]->heap_size = heap_size;
-    
+
     /* reload segments */
     set_segment(0x3, task_table[current_task]->base, task_table[current_task]->pages);
     set_segment(0x4, task_table[current_task]->base, task_table[current_task]->pages);
-    
+
     return 0;
 }
 
@@ -396,39 +403,39 @@ again:
         heap_chunk = (heap_chunk_t*)heap_chunk_ptr;
         goto again;
     } */
-    
+
     return (void*)0;
 }
 
 void free(void* addr) { /*
     uint32_t heap_chunk_ptr = (uint32_t)addr;
     heap_chunk_ptr += task_table[current_task]->base;
-    
+
     heap_chunk_ptr -= sizeof(heap_chunk_t);
     heap_chunk_t* heap_chunk = (heap_chunk_t*)heap_chunk_ptr;
-    
+
     heap_chunk_ptr += heap_chunk->size + sizeof(heap_chunk_t);
     heap_chunk_t* next_chunk = (heap_chunk_t*)heap_chunk_ptr;
-    
+
     heap_chunk_t* prev_chunk;
     if (heap_chunk->prev_chunk)
         prev_chunk = (heap_chunk_t*)(heap_chunk->prev_chunk + task_table[current_task]->base);
     else
         prev_chunk = (heap_chunk_t*)0;
-    
+
     // flag chunk as free
     heap_chunk->free = 1;
-    
+
     // if the next chunk is free as well, fuse the chunks into a single one
     if (next_chunk->free)
         heap_chunk->size += next_chunk->size + sizeof(heap_chunk_t);
-    
+
     // if the previous chunk is free as well, fuse the chunks into a single one
     if (prev_chunk) {       // if its not the first chunk
         if (prev_chunk->free)
             prev_chunk->size += heap_chunk->size + sizeof(heap_chunk_t);
     } */
-    
+
     return;
 }
 

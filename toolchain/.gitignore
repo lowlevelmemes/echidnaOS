@@ -2,4 +2,4 @@
 !.gitignore
 !*.sh
 !*.patch
-
+!*.in

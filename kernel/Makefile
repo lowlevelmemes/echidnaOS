@@ -1,4 +1,4 @@
-CC = i386-echidnaos-gcc
+CC = i686-echidnaos-gcc
 PREFIX = 
 
 C_FILES = init.c $(shell find src -type f -name '*.c')

@@ -1,0 +1,15 @@
+[binaries]
+c = 'i686-echidnaos-gcc'
+cpp = 'i686-echidnaos-g++'
+ar = 'i686-echidnaos-ar'
+strip = 'i686-echidnaos-strip'
+pkgconfig = 'pkg-config'
+
+[properties]
+root = '@@sysroot@@'
+
+[host_machine]
+system = 'echidnaos'
+cpu_family = 'x86'
+cpu = 'i686'
+endian = 'little'

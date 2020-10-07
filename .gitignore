@@ -5,3 +5,5 @@
 /**/*.bin
 /shell/sh
 /bochsout.txt
+/root
+/cross-root
