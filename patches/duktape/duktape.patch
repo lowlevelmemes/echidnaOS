@@ -1,0 +1,12 @@
+diff -ur dt/Makefile.cmdline duktape-2.5.0/Makefile.cmdline
+--- dt/Makefile.cmdline	2019-11-24 14:04:27.000000000 -0800
++++ duktape-2.5.0/Makefile.cmdline	2020-10-08 12:05:14.672941290 -0700
+@@ -8,7 +8,7 @@
+ CMDLINE_SOURCES = \
+ 	examples/cmdline/duk_cmdline.c
+ 
+-CC = gcc
++CC = i686-echidnaos-gcc
+ CCOPTS = -Os -pedantic -std=c99 -Wall -fstrict-aliasing -fomit-frame-pointer
+ CCOPTS += -I./examples/cmdline -I./src   # duktape.h and duk_config.h must be in include path
+ CCLIBS = -lm

@@ -220,3 +220,20 @@ packages:
         workdir: '@THIS_SOURCE_DIR@'
       - args: ['make', 'DESTDIR=@THIS_COLLECT_DIR@', 'install']
         workdir: '@THIS_SOURCE_DIR@'
+  
+  - name: duktape
+    source:
+      subdir: 'ports'
+      url: 'https://duktape.org/duktape-2.5.0.tar.xz'
+      format: 'tar.xz'
+      extract_path: 'duktape-2.5.0'
+      patch-path-strip: 1
+    tools_required:
+      - host-gcc
+    build:
+      - args: ['make', '-f', 'Makefile.cmdline']
+        workdir: '@THIS_SOURCE_DIR@'
+      - args: ['install', '-d', '@THIS_COLLECT_DIR@/bin']
+        workdir: '@THIS_SOURCE_DIR@'
+      - args: ['install', 'duk', '@THIS_COLLECT_DIR@/bin']
+        workdir: '@THIS_SOURCE_DIR@'
