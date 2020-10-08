@@ -8,9 +8,9 @@
 
 #define MAX_STTY 1
 
-static char* stty_names[] = { "stty0", "stty1", "stty2", "stty3" };
+static char* stty_names[] = { "ns16650(0)port(0)tty(0)", "ns16650(0)port(1)tty(0)", "ns16650(0)port(2)tty(0)", "ns16650(0)port(3)tty(0)" };
 
-static char* com_devices[] = { ":://com1", ":://com2", ":://com3", ":://com4" };
+static char* com_devices[] = { ":://ns16650(0)port(0)", ":://ns16650(0)port(1)", ":://ns16650(0)port(2)", ":://ns16650(0)port(3)" };
 
 static char* devices[MAX_STTY];
 

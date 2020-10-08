@@ -30,13 +30,13 @@ static uint64_t cached_block;
 static uint8_t disk_cache[CACHE_SIZE];
 
 static char* bios_harddrive_names[] = {
-    "bda", "bdb", "bdc", "bdd",
-    "bde", "bdf", "bdg", "bdh",
-    "bdi", "bdj", "bdk", "bdl",
-    "bdm", "bdn", "bdo", "bdp",
-    "bdq", "bdr", "bds", "bdt",
-    "bdu", "bdv", "bdw", "bdx",
-    "bdy", "bdz"
+    "bdrive(0)", "bdrive(1)", "bdrive(2)", "bdrive(3)",
+    "bdrive(4)", "bdrive(5)", "bdrive(6)", "bdrive(7)",
+    "bdrive(8)", "bdrive(9)", "bdrive(10)", "bdrive(11)",
+    "bdrive(12)", "bdrive(13)", "bdrive(14)", "bdrive(15)",
+    "bdrive(16)", "bdrive(17)", "bdrive(18)", "bdrive(19)",
+    "bdrive(20)", "bdrive(21)", "bdrive(22)", "bdrive(23)",
+    "bdrive(24)", "bdrive(25)", "bdrive(26)"
 };
 
 uint8_t bios_harddisk_read(uint8_t drive, uint64_t loc);

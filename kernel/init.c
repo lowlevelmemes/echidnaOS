@@ -22,9 +22,6 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     load_IDT();
     load_TSS();
 
-    // initialise keyboard driver
-    keyboard_init();
-
     #ifndef _BIG_FONTS_
       vga_80_x_50();
     #endif
@@ -61,6 +58,7 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     init_stty();
     init_pcspk();
     init_pic();
+    keyboard_init();
 
 
     // ******* END OF DRIVER INITIALISATION CALLS *******
@@ -101,17 +99,17 @@ void kernel_init(struct stivale_struct *stivale_struct) {
         0
     };
 
-    if (vfs_mount("/", ":://initramfs", "echfs") == -2)
+    if (vfs_mount("/", ":://ramdisk(0)", "echfs") == -2)
         for(;;);
     vfs_mount("/dev", "devfs", "devfs");
 
     // launch the shell
     kputs("\nKERNEL INIT DONE!\n");
-    kstrcpy(tty_path, "/dev/tty0");
+    kstrcpy(tty_path, "/dev/tty(0)");
     general_execute(&shell_exec);
-    kstrcpy(tty_path, "/dev/tty1");
+    kstrcpy(tty_path, "/dev/tty(1)");
     general_execute(&shell_exec);
-    kstrcpy(tty_path, "/dev/tty2");
+    kstrcpy(tty_path, "/dev/tty(2)");
     general_execute(&shell_exec);
 
     // wait for task scheduler

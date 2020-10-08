@@ -28,7 +28,7 @@ void init_initramfs(struct stivale_struct *stivale_struct) {
 
     initramfs = (void*)(uintptr_t)module->begin;
 
-    kernel_add_device("initramfs", 0, INITRAMFS_SIZE, &initramfs_io_wrapper);
+    kernel_add_device("ramdisk(0)", 0, INITRAMFS_SIZE, &initramfs_io_wrapper);
 
     kputs("\nInitialised initramfs.");
 

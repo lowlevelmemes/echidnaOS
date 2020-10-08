@@ -32,6 +32,6 @@ static inline int detect_e9(void) {
 
 void init_e9(void) {
     if (detect_e9()) {
-        kernel_add_device("e9", 0, 0, &e9_io_wrapper);
+        kernel_add_device("bochs(0)e9(0)", 0, 0, &e9_io_wrapper);
     }
 }
