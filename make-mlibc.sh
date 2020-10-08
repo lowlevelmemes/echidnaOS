@@ -1,21 +1,19 @@
 #!/bin/bash
 
-set -e
-set -x
+set -ex
 
-export PATH="$(realpath cross-root/bin):$PATH"
+[ -d mlibc-workdir ] || ( \
+    mkdir mlibc-workdir && \
+    tar -xf mlibc.tar.gz -C mlibc-workdir --strip-components=1 && \
+    cd mlibc-workdir && \
+    patch -p2 < ../patches/mlibc/mlibc.patch )
 
-SYSROOT="$(realpath root)"
+[ -d mlibc-orig ] || ( \
+    mkdir mlibc-orig && \
+    tar -xf mlibc.tar.gz -C mlibc-orig --strip-components=1 )
 
-cd toolchain/build
-rm -rf mlibc/cxxshim mlibc/frigg
+git diff --no-index mlibc-orig mlibc-workdir > patches/mlibc/mlibc.patch || true
 
-git diff --no-index mlibc-orig mlibc > ../mlibc.patch || true
-
-rm -rf build-mlibc
-mkdir build-mlibc
-cd build-mlibc
-
-meson --cross-file ../../cross_file.txt --prefix=/usr --libdir=lib --buildtype=debugoptimized -Dstatic=true -Dmlibc_no_headers=true ../mlibc
-ninja
-DESTDIR="$SYSROOT" ninja install
+rm -rf mlibc
+cd build
+xbstrap install -u mlibc

@@ -1,8 +1,8 @@
-diff --git a/mlibc/abis/echidnaos/auxv.h b/mlibc/abis/echidnaos/auxv.h
+diff --git a/mlibc-workdir/abis/echidnaos/auxv.h b/mlibc-workdir/abis/echidnaos/auxv.h
 new file mode 100644
 index 0000000..6f17767
 --- /dev/null
-+++ b/mlibc/abis/echidnaos/auxv.h
++++ b/mlibc-workdir/abis/echidnaos/auxv.h
 @@ -0,0 +1,10 @@
 +#ifndef _ABIBITS_AUXV_H
 +#define _ABIBITS_AUXV_H
@@ -14,11 +14,11 @@ index 0000000..6f17767
 +#define AT_EXECFN 31
 +
 +#endif // _ABIBITS_AUXV_H
-diff --git a/mlibc/abis/echidnaos/seek-whence.h b/mlibc/abis/echidnaos/seek-whence.h
+diff --git a/mlibc-workdir/abis/echidnaos/seek-whence.h b/mlibc-workdir/abis/echidnaos/seek-whence.h
 new file mode 100644
 index 0000000..901121c
 --- /dev/null
-+++ b/mlibc/abis/echidnaos/seek-whence.h
++++ b/mlibc-workdir/abis/echidnaos/seek-whence.h
 @@ -0,0 +1,8 @@
 +#ifndef _ABIBITS_SEEK_WHENCE_H
 +#define _ABIBITS_SEEK_WHENCE_H
@@ -28,10 +28,10 @@ index 0000000..901121c
 +#define SEEK_SET 0
 +
 +#endif // _ABIBITS_SEEK_WHENCE_H
-diff --git a/mlibc-orig/meson.build b/mlibc/meson.build
+diff --git a/mlibc-orig/meson.build b/mlibc-workdir/meson.build
 index 3818563..7c788af 100644
 --- a/mlibc-orig/meson.build
-+++ b/mlibc/meson.build
++++ b/mlibc-workdir/meson.build
 @@ -8,7 +8,7 @@ rtdl_include_dirs = [
  ]
  libc_include_dirs = [
@@ -115,10 +115,10 @@ index 3818563..7c788af 100644
  	endif
  endif
  
-diff --git a/mlibc-orig/options/ansi/generic/stdlib-stubs.cpp b/mlibc/options/ansi/generic/stdlib-stubs.cpp
+diff --git a/mlibc-orig/options/ansi/generic/stdlib-stubs.cpp b/mlibc-workdir/options/ansi/generic/stdlib-stubs.cpp
 index cde5af7..3c5063b 100644
 --- a/mlibc-orig/options/ansi/generic/stdlib-stubs.cpp
-+++ b/mlibc/options/ansi/generic/stdlib-stubs.cpp
++++ b/mlibc-workdir/options/ansi/generic/stdlib-stubs.cpp
 @@ -99,7 +99,7 @@ long strtol(const char *__restrict string, char **__restrict end, int base) {
  	return negative ? -result : result;
  }
@@ -137,10 +137,10 @@ index cde5af7..3c5063b 100644
  	return strtoul(string, end, base);
  }
  
-diff --git a/mlibc-orig/options/elf/generic/startup.cpp b/mlibc/options/elf/generic/startup.cpp
+diff --git a/mlibc-orig/options/elf/generic/startup.cpp b/mlibc-workdir/options/elf/generic/startup.cpp
 index 73cc50e..9265090 100644
 --- a/mlibc-orig/options/elf/generic/startup.cpp
-+++ b/mlibc/options/elf/generic/startup.cpp
++++ b/mlibc-workdir/options/elf/generic/startup.cpp
 @@ -6,6 +6,7 @@
  #include <bits/ensure.h>
  #include <mlibc/elf/startup.h>
@@ -165,10 +165,10 @@ index 73cc50e..9265090 100644
  }
  
  namespace mlibc {
-diff --git a/mlibc-orig/options/internal/gcc-extra/mlibc_crtbegin.S b/mlibc/options/internal/gcc-extra/mlibc_crtbegin.S
+diff --git a/mlibc-orig/options/internal/gcc-extra/mlibc_crtbegin.S b/mlibc-workdir/options/internal/gcc-extra/mlibc_crtbegin.S
 index 77b143b..f3990b9 100644
 --- a/mlibc-orig/options/internal/gcc-extra/mlibc_crtbegin.S
-+++ b/mlibc/options/internal/gcc-extra/mlibc_crtbegin.S
++++ b/mlibc-workdir/options/internal/gcc-extra/mlibc_crtbegin.S
 @@ -3,7 +3,7 @@
  .hidden __dso_handle
  .global __dso_handle
@@ -178,11 +178,11 @@ index 77b143b..f3990b9 100644
  
  .section .init
  .hidden _init
-diff --git a/mlibc/options/internal/x86/thread.cpp b/mlibc/options/internal/x86/thread.cpp
+diff --git a/mlibc-workdir/options/internal/x86/thread.cpp b/mlibc-workdir/options/internal/x86/thread.cpp
 new file mode 100644
 index 0000000..671e77e
 --- /dev/null
-+++ b/mlibc/options/internal/x86/thread.cpp
++++ b/mlibc-workdir/options/internal/x86/thread.cpp
 @@ -0,0 +1,13 @@
 +#include <mlibc/thread.hpp>
 +
@@ -197,11 +197,11 @@ index 0000000..671e77e
 +}
 +
 +} // namespace mlibc
-diff --git a/mlibc/options/internal/x86-include/mlibc/arch-defs.hpp b/mlibc/options/internal/x86-include/mlibc/arch-defs.hpp
+diff --git a/mlibc-workdir/options/internal/x86-include/mlibc/arch-defs.hpp b/mlibc-workdir/options/internal/x86-include/mlibc/arch-defs.hpp
 new file mode 100644
 index 0000000..0a4789f
 --- /dev/null
-+++ b/mlibc/options/internal/x86-include/mlibc/arch-defs.hpp
++++ b/mlibc-workdir/options/internal/x86-include/mlibc/arch-defs.hpp
 @@ -0,0 +1,12 @@
 +#ifndef MLIBC_ARCH_DEFS_HPP
 +#define MLIBC_ARCH_DEFS_HPP
@@ -215,10 +215,10 @@ index 0000000..0a4789f
 +} // namespace mlibc
 +
 +#endif // MLIBC_ARCH_DEFS_HPP
-diff --git a/mlibc-orig/options/rtdl/generic/main.cpp b/mlibc/options/rtdl/generic/main.cpp
+diff --git a/mlibc-orig/options/rtdl/generic/main.cpp b/mlibc-workdir/options/rtdl/generic/main.cpp
 index c18beeb..bd3fe2c 100644
 --- a/mlibc-orig/options/rtdl/generic/main.cpp
-+++ b/mlibc/options/rtdl/generic/main.cpp
++++ b/mlibc-workdir/options/rtdl/generic/main.cpp
 @@ -267,7 +267,7 @@ struct __abi_tls_entry {
  	uint64_t offset;
  };
@@ -228,11 +228,11 @@ index c18beeb..bd3fe2c 100644
  
  const char *lastError;
  
-diff --git a/mlibc/options/rtdl/x86/entry.S b/mlibc/options/rtdl/x86/entry.S
+diff --git a/mlibc-workdir/options/rtdl/x86/entry.S b/mlibc-workdir/options/rtdl/x86/entry.S
 new file mode 100644
 index 0000000..c4e3392
 --- /dev/null
-+++ b/mlibc/options/rtdl/x86/entry.S
++++ b/mlibc-workdir/options/rtdl/x86/entry.S
 @@ -0,0 +1,10 @@
 +
 +.global _start
@@ -244,21 +244,21 @@ index 0000000..c4e3392
 +	call interpreterMain
 +
 +	jmp *%rax
-diff --git a/mlibc/options/rtdl/x86/runtime.S b/mlibc/options/rtdl/x86/runtime.S
+diff --git a/mlibc-workdir/options/rtdl/x86/runtime.S b/mlibc-workdir/options/rtdl/x86/runtime.S
 new file mode 100644
 index 0000000..c233646
 --- /dev/null
-+++ b/mlibc/options/rtdl/x86/runtime.S
++++ b/mlibc-workdir/options/rtdl/x86/runtime.S
 @@ -0,0 +1,4 @@
 +
 +.global pltRelocateStub
 +pltRelocateStub:
 +	# TODO: implement this lol
-diff --git a/mlibc/sysdeps/echidnaos/crt-i386/crt0.S b/mlibc/sysdeps/echidnaos/crt-i386/crt0.S
+diff --git a/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S b/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S
 new file mode 100644
 index 0000000..3aad212
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/crt-i386/crt0.S
++++ b/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S
 @@ -0,0 +1,11 @@
 +.section .echidnaos_entry
 +.global _start
@@ -271,11 +271,11 @@ index 0000000..3aad212
 +___tls_get_addr:
 +    mov $0x12348765, %eax
 +    jmp ___tls_get_addr
-diff --git a/mlibc/sysdeps/echidnaos/generic/entry.cpp b/mlibc/sysdeps/echidnaos/generic/entry.cpp
+diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/entry.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/entry.cpp
 new file mode 100644
 index 0000000..282953f
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/generic/entry.cpp
++++ b/mlibc-workdir/sysdeps/echidnaos/generic/entry.cpp
 @@ -0,0 +1,20 @@
 +
 +#include <stdint.h>
@@ -297,11 +297,11 @@ index 0000000..282953f
 +	exit(result);
 +}
 +
-diff --git a/mlibc/sysdeps/echidnaos/generic/generic.cpp b/mlibc/sysdeps/echidnaos/generic/generic.cpp
+diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
 index 0000000..dad96c2
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/generic/generic.cpp
++++ b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 @@ -0,0 +1,161 @@
 +
 +#include <bits/ensure.h>
@@ -464,187 +464,187 @@ index 0000000..dad96c2
 +
 +} // namespace mlibc
 +
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/abi.h b/mlibc/sysdeps/echidnaos/include/abi-bits/abi.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/abi.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/abi.h
 new file mode 120000
 index 0000000..c945860
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/abi.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/abi.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/abi.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/auxv.h b/mlibc/sysdeps/echidnaos/include/abi-bits/auxv.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/auxv.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/auxv.h
 new file mode 120000
 index 0000000..0e298c4
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/auxv.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/auxv.h
 @@ -0,0 +1 @@
 +../../../../abis/echidnaos/auxv.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/blkcnt_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/blkcnt_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/blkcnt_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/blkcnt_t.h
 new file mode 120000
 index 0000000..e9d9f1b
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/blkcnt_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/blkcnt_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/blkcnt_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/blksize_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/blksize_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/blksize_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/blksize_t.h
 new file mode 120000
 index 0000000..c6dfb6e
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/blksize_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/blksize_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/blksize_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/dev_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/dev_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/dev_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/dev_t.h
 new file mode 120000
 index 0000000..0c1143b
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/dev_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/dev_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/dev_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/errno.h b/mlibc/sysdeps/echidnaos/include/abi-bits/errno.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/errno.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/errno.h
 new file mode 120000
 index 0000000..589859f
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/errno.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/errno.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/errno.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/fcntl.h b/mlibc/sysdeps/echidnaos/include/abi-bits/fcntl.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/fcntl.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/fcntl.h
 new file mode 120000
 index 0000000..ea5323a
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/fcntl.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/fcntl.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/fcntl.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/gid_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/gid_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/gid_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/gid_t.h
 new file mode 120000
 index 0000000..6a77218
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/gid_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/gid_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/gid_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/in.h b/mlibc/sysdeps/echidnaos/include/abi-bits/in.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/in.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/in.h
 new file mode 120000
 index 0000000..b58c683
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/in.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/in.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/in.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/ino_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/ino_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/ino_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/ino_t.h
 new file mode 120000
 index 0000000..10d644e
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/ino_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/ino_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/ino_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/mode_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/mode_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/mode_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/mode_t.h
 new file mode 120000
 index 0000000..29d7733
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/mode_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/mode_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/mode_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/nlink_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/nlink_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/nlink_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/nlink_t.h
 new file mode 120000
 index 0000000..7618c27
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/nlink_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/nlink_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/nlink_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/pid_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/pid_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/pid_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/pid_t.h
 new file mode 120000
 index 0000000..3fd26a7
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/pid_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/pid_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/pid_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/resource.h b/mlibc/sysdeps/echidnaos/include/abi-bits/resource.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/resource.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/resource.h
 new file mode 120000
 index 0000000..3e59c75
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/resource.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/resource.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/resource.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/seek-whence.h b/mlibc/sysdeps/echidnaos/include/abi-bits/seek-whence.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/seek-whence.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/seek-whence.h
 new file mode 120000
 index 0000000..fcf5063
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/seek-whence.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/seek-whence.h
 @@ -0,0 +1 @@
 +../../../../abis/echidnaos/seek-whence.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/signal.h b/mlibc/sysdeps/echidnaos/include/abi-bits/signal.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/signal.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/signal.h
 new file mode 120000
 index 0000000..b20e511
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/signal.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/signal.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/signal.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/socket.h b/mlibc/sysdeps/echidnaos/include/abi-bits/socket.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/socket.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/socket.h
 new file mode 120000
 index 0000000..0e1d6be
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/socket.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/socket.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/socket.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/stat.h b/mlibc/sysdeps/echidnaos/include/abi-bits/stat.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/stat.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/stat.h
 new file mode 120000
 index 0000000..82642c3
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/stat.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/stat.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/stat.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/termios.h b/mlibc/sysdeps/echidnaos/include/abi-bits/termios.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/termios.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/termios.h
 new file mode 120000
 index 0000000..cfcfe76
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/termios.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/termios.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/termios.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/time.h b/mlibc/sysdeps/echidnaos/include/abi-bits/time.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/time.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/time.h
 new file mode 120000
 index 0000000..97f3d52
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/time.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/time.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/time.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/uid_t.h b/mlibc/sysdeps/echidnaos/include/abi-bits/uid_t.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/uid_t.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/uid_t.h
 new file mode 120000
 index 0000000..1113eba
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/uid_t.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/uid_t.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/uid_t.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/abi-bits/vm-flags.h b/mlibc/sysdeps/echidnaos/include/abi-bits/vm-flags.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/vm-flags.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/vm-flags.h
 new file mode 120000
 index 0000000..f1a985e
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/abi-bits/vm-flags.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/vm-flags.h
 @@ -0,0 +1 @@
 +../../../../abis/mlibc/vm-flags.h
 \ No newline at end of file
-diff --git a/mlibc/sysdeps/echidnaos/include/sys_api.h b/mlibc/sysdeps/echidnaos/include/sys_api.h
+diff --git a/mlibc-workdir/sysdeps/echidnaos/include/sys_api.h b/mlibc-workdir/sysdeps/echidnaos/include/sys_api.h
 new file mode 100644
 index 0000000..af0a346
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/include/sys_api.h
++++ b/mlibc-workdir/sysdeps/echidnaos/include/sys_api.h
 @@ -0,0 +1,425 @@
 +/*
 + *  echidnaOS kernel API
@@ -1071,11 +1071,11 @@ index 0000000..af0a346
 +})
 +
 +#endif
-diff --git a/mlibc/sysdeps/echidnaos/meson.build b/mlibc/sysdeps/echidnaos/meson.build
+diff --git a/mlibc-workdir/sysdeps/echidnaos/meson.build b/mlibc-workdir/sysdeps/echidnaos/meson.build
 new file mode 100644
 index 0000000..be98069
 --- /dev/null
-+++ b/mlibc/sysdeps/echidnaos/meson.build
++++ b/mlibc-workdir/sysdeps/echidnaos/meson.build
 @@ -0,0 +1,47 @@
 +libc_sources += files(
 +	'generic/entry.cpp',

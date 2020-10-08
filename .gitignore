@@ -6,6 +6,8 @@
 /**/*.elf
 /**/*.bin
 /mlibc
+/mlibc-orig
+/mlibc-workdir
 /mlibc.tar.gz
 /shell/sh
 /bochsout.txt
