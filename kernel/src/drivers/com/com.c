@@ -20,7 +20,7 @@ typedef struct {
     uint16_t scratch_reg;
 } com_device;
 
-static char* com_names[] = { "ns16650(0)port(0)", "ns16650(0)port(1)", "ns16650(0)port(2)", "ns16650(0)port(3)" };
+static char* com_names[] = { "NS16650 Port 0", "NS16650 Port 1", "NS16650 Port 2", "NS16650 Port 3" };
 
 static uint16_t com_ports[] = { 0x3f8, 0x2f8, 0x3e8, 0x2e8 };
 

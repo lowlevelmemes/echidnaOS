@@ -63,6 +63,6 @@ int pic_io_wrapper(uint32_t dev, uint64_t loc, int type, uint8_t payload) {
 }
 
 void init_pic(void) {
-	kernel_add_device("i8259(0)", 0, 0, &pic_io_wrapper);
-	kernel_add_device("i8259(1)", 1, 0, &pic_io_wrapper);
+	kernel_add_device("I8259 Master", 0, 0, &pic_io_wrapper);
+	kernel_add_device("I8259 Slave", 1, 0, &pic_io_wrapper);
 }

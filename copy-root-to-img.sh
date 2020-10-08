@@ -37,7 +37,7 @@ FILES_COUNTER=1
 for i in $ROOT_FILES; do
     printf "\r\e[KFile $FILES_COUNTER/$ROOT_FILES_COUNT ($i)"
     echo $(( FILES_COUNTER++ )) > /dev/null
-    echfs-utils "$IMAGE_REALPATH" import "$i" "$i" &> /dev/null
+    echfs-utils "$IMAGE_REALPATH" import "$i" "$i"
 done
 
 printf "\nDone.\n"

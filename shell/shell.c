@@ -214,11 +214,11 @@ int main(int argc, char** argv) {
 
         else if (!strcmp("beep", s_argv[0])) {
             if (s_argc == 1) continue;
-            OS_vfs_write("/dev/pcspk", 0, atoi(s_argv[1]));
+            OS_vfs_write("/dev/PC Speaker", 0, atoi(s_argv[1]));
         }
 
         else if (!strcmp("rdspk", s_argv[0]))
-            printf("%d\n", OS_vfs_read("/dev/pcspk", 0));
+            printf("%d\n", OS_vfs_read("/dev/PC Speaker", 0));
 
         else if (!strcmp("send", s_argv[0])) {
             char server[] = "server";

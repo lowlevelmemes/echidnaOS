@@ -45,13 +45,13 @@ typedef struct {
 } ata_device;
 
 static char* ata_names[] = {
-    "ata(0)", "ata(1)", "ata(2)", "ata(3)",
-    "ata(4)", "ata(5)", "ata(6)", "ata(7)",
-    "ata(8)", "ata(9)", "ata(10)", "ata(11)",
-    "ata(12)", "ata(13)", "ata(14)", "ata(15)",
-    "ata(16)", "ata(17)", "ata(18)", "ata(19)",
-    "ata(20)", "ata(21)", "ata(22)", "ata(23)",
-    "ata(24)", "ata(25)", "ata(26)"
+    "ATA Drive 0", "ATA Drive 1", "ATA Drive 2", "ATA Drive 3",
+    "ATA Drive 4", "ATA Drive 5", "ATA Drive 6", "ATA Drive 7",
+    "ATA Drive 8", "ATA Drive 9", "ATA Drive 10", "ATA Drive 11",
+    "ATA Drive 12", "ATA Drive 13", "ATA Drive 14", "ATA Drive 15",
+    "ATA Drive 16", "ATA Drive 17", "ATA Drive 18", "ATA Drive 19",
+    "ATA Drive 20", "ATA Drive 21", "ATA Drive 22", "ATA Drive 23",
+    "ATA Drive 24", "ATA Drive 25", "ATA Drive 26"
 };
 
 static uint16_t ata_ports[] = { 0x1f0, 0x1f0, 0x170, 0x170 };

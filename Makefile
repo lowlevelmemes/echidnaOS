@@ -1,5 +1,6 @@
 PATH := $(shell pwd)/build/tools/host-binutils/bin:$(PATH)
 PATH := $(shell pwd)/build/tools/host-gcc/bin:$(PATH)
+IMGSIZE := 32768
 
 .PHONY: all clean run
 
@@ -23,8 +24,8 @@ clean:
 	$(MAKE) clean -C kernel
 
 echidna.img: limine/limine-install kernel/echidna.elf shell/sh
-	dd bs=32768 count=0 seek=256 if=/dev/zero of=initramfs.img
-	echfs-utils initramfs.img format 32768
+	dd bs=$(IMGSIZE) count=0 seek=256 if=/dev/zero of=initramfs.img
+	echfs-utils initramfs.img format $(IMGSIZE)
 	echfs-utils initramfs.img mkdir dev
 	echfs-utils initramfs.img mkdir bin
 	echfs-utils initramfs.img mkdir sys
@@ -35,10 +36,10 @@ echidna.img: limine/limine-install kernel/echidna.elf shell/sh
 	echfs-utils initramfs.img import ./build/system-root/usr/bin/bashbug /usr/bin/bashbug
 	echfs-utils initramfs.img import ./build/system-root/usr/local/bin/hello /usr/local/bin/hello
 	#./copy-root-to-img.sh build/system-root/ initramfs.img
-	dd bs=32768 count=0 seek=8192 if=/dev/zero of=echidna.img
+	dd bs=$(IMGSIZE) count=0 seek=8192 if=/dev/zero of=echidna.img
 	parted -s echidna.img mklabel msdos
 	parted -s echidna.img mkpart primary 2048s 100%
-	echfs-utils -m -p0 echidna.img format 32768
+	echfs-utils -m -p0 echidna.img format $(IMGSIZE)
 	echfs-utils -m -p0 echidna.img import ./kernel/echidna.elf echidna.elf
 	echfs-utils -m -p0 echidna.img import ./initramfs.img initramfs.img
 	echfs-utils -m -p0 echidna.img import ./limine.cfg limine.cfg

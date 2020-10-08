@@ -198,7 +198,7 @@ packages:
       - args:
         - '@THIS_SOURCE_DIR@/configure'
         - '--host=i686-echidnaos'
-        - '--prefix=/usr'
+        - '--prefix=/'
         - '--enable-static-link'
         - '--without-bash-malloc'
         - '--disable-nls'
@@ -209,9 +209,9 @@ packages:
   - name: hello
     source:
       subdir: 'ports'
-      url: 'https://github.com/lowlevelmemes/hello/archive/v1.2.tar.gz'
+      url: 'https://github.com/lowlevelmemes/hello/archive/1.2a.tar.gz'
       format: 'tar.gz'
-      extract_path: 'hello-1.2'
+      extract_path: 'hello-1.2a'
       patch-path-strip: 1
     tools_required:
       - host-gcc
