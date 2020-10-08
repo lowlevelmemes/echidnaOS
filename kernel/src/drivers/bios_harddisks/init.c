@@ -30,13 +30,13 @@ static uint64_t cached_block;
 static uint8_t disk_cache[CACHE_SIZE];
 
 static char* bios_harddrive_names[] = {
-    "BIOS Drive 0", "BIOS Drive 1", "BIOS Drive 2", "BIOS Drive 3",
-    "BIOS Drive 4", "BIOS Drive 5", "BIOS Drive 6", "BIOS Drive 7",
-    "BIOS Drive 8", "BIOS Drive 9", "BIOS Drive 10", "BIOS Drive 11",
-    "BIOS Drive 12", "BIOS Drive 13", "BIOS Drive 14", "BIOS Drive 15",
-    "BIOS Drive 16", "BIOS Drive 17", "BIOS Drive 18", "BIOS Drive 19",
-    "BIOS Drive 20", "BIOS Drive 21", "BIOS Drive 22", "BIOS Drive 23",
-    "BIOS Drive 24", "BIOS Drive 25", "BIOS Drive 26"
+    "bios drive 0", "bios drive 1", "bios drive 2", "bios drive 3",
+    "bios drive 4", "bios drive 5", "bios drive 6", "bios drive 7",
+    "bios drive 8", "bios drive 9", "bios drive 10", "bios drive 11",
+    "bios drive 12", "bios drive 13", "bios drive 14", "bios drive 15",
+    "bios drive 16", "bios drive 17", "bios drive 18", "bios drive 19",
+    "bios drive 20", "bios drive 21", "bios drive 22", "bios drive 23",
+    "bios drive 24", "bios drive 25", "bios drive 26"
 };
 
 uint8_t bios_harddisk_read(uint8_t drive, uint64_t loc);
@@ -65,7 +65,7 @@ void init_bios_harddisks(void) {
         // limit exceeded, return
         return;
 found:
-        kputs("\nBIOS drive:         "); kxtoa(drive_parameters.drive);
+        kputs("\nbios drive:         "); kxtoa(drive_parameters.drive);
         kputs("\nCylinder count:     "); kuitoa(drive_parameters.cyl_count);
         kputs("\nHead count:         "); kuitoa(drive_parameters.head_count);
         kputs("\nSect per track:     "); kuitoa(drive_parameters.sect_per_track);

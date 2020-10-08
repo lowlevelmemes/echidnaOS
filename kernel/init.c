@@ -99,17 +99,17 @@ void kernel_init(struct stivale_struct *stivale_struct) {
         0
     };
 
-    if (vfs_mount("/", ":://Initial RAMDisk", "echfs") == -2)
+    if (vfs_mount("/", ":://initial ramdisk", "echfs") == -2)
         for(;;);
     vfs_mount("/dev", "devfs", "devfs");
 
     // launch the shell
     kputs("\nKERNEL INIT DONE!\n");
-    kstrcpy(tty_path, "/dev/TTY 0");
+    kstrcpy(tty_path, "/dev/tty 0");
     general_execute(&shell_exec);
-    kstrcpy(tty_path, "/dev/TTY 1");
+    kstrcpy(tty_path, "/dev/tty 1");
     general_execute(&shell_exec);
-    kstrcpy(tty_path, "/dev/TTY 2");
+    kstrcpy(tty_path, "/dev/tty 2");
     general_execute(&shell_exec);
 
     // wait for task scheduler
