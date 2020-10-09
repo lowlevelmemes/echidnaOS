@@ -1,11 +1,13 @@
 #include <stdint.h>
+#include <stddef.h>
 #include <kernel.h>
 #include <cio.h>
 
 void syscall_log(const char *msg) {
     msg += task_table[current_task]->base;
-    kputs(msg);
-    kputs("\n");
+    for (size_t i = 0; msg[i]; i++)
+        port_out_b(0xe9, msg[i]);
+    port_out_b(0xe9, '\n');
 }
 
 int lseek(int handle, int offset, int type) {

@@ -299,10 +299,10 @@ index 0000000..282953f
 +
 diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
-index 0000000..dad96c2
+index 0000000..ebb8f66
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
-@@ -0,0 +1,161 @@
+@@ -0,0 +1,215 @@
 +
 +#include <bits/ensure.h>
 +#include <mlibc/debug.hpp>
@@ -370,9 +370,6 @@ index 0000000..dad96c2
 +    	*pointer = (void*)ptr;
 +        return 0;
 +    }
-+
-+    // Misc functions
-+    int sys_clock_get(int clock, time_t *secs, long *nanos) STUB_ONLY
 +
 +    // TODO: Actually implement this
 +    int sys_futex_wait(int *pointer, int expected) STUB_ONLY
@@ -462,6 +459,63 @@ index 0000000..dad96c2
 +        return 0;
 +    }
 +
++    int sys_ttyname(int fd, char *buf, size_t size) {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return ENOSYS;
++    }
++
++    int sys_gethostname(char *buffer, size_t bufsize) {
++        strncpy(buffer, "echidnaOS", bufsize-1);
++        buffer[bufsize-1] = 0;
++        return 0;
++    }
++
++    gid_t sys_getgid() {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return 0;
++    }
++    gid_t sys_getegid() {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return 0;
++    }
++    uid_t sys_getuid() {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return 0;
++    }
++    uid_t sys_geteuid() {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return 0;
++    }
++    pid_t sys_getpid() {
++        pid_t pid;
++        asm volatile ("int $0x80"
++                : "=a"(pid)
++                : "a"(0x15)
++                : "edx", "memory");
++        return pid;
++    }
++    pid_t sys_getppid() {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return 0;
++    }
++
++    int sys_clock_get(int clock, time_t *secs, long *nanos) {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        *secs  = 0;
++        *nanos = 0;
++        return 0;
++    }
++
++    int sys_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++
++        return ENOSYS;
++    }
++
++    int sys_sigprocmask(int how, const sigset_t *__restrict set, sigset_t *__restrict retrieve) {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return ENOSYS;
++    }
 +} // namespace mlibc
 +
 diff --git a/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/abi.h b/mlibc-workdir/sysdeps/echidnaos/include/abi-bits/abi.h

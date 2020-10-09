@@ -32,8 +32,8 @@ echidna.img: limine/limine-install kernel/echidna.elf shell/sh
 	echfs-utils initramfs.img mkdir docs
 	echfs-utils initramfs.img import ./shell/sh /sys/init
 	echfs-utils initramfs.img import ./LICENSE.md /docs/license
-	echfs-utils initramfs.img import ./build/system-root/usr/bin/bash /usr/bin/bash
-	echfs-utils initramfs.img import ./build/system-root/usr/bin/bashbug /usr/bin/bashbug
+	echfs-utils initramfs.img import ./build/system-root/bin/bash /bin/bash
+	echfs-utils initramfs.img import ./build/system-root/bin/bashbug /bin/bashbug
 	echfs-utils initramfs.img import ./build/system-root/bin/hello /bin/hello
 	echfs-utils initramfs.img import ./build/system-root/bin/duk /bin/duk
 	#./copy-root-to-img.sh build/system-root/ initramfs.img
