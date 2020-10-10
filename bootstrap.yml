@@ -224,7 +224,7 @@ packages:
   - name: duktape
     source:
       subdir: 'ports'
-      url: 'https://duktape.org/duktape-2.5.0.tar.xz'
+      url: 'https://mirror.dorper.me/echidnaos/pkg/duktape/duktape-2.5.0.tar.xz'
       format: 'tar.xz'
       extract_path: 'duktape-2.5.0'
       patch-path-strip: 1
@@ -236,4 +236,21 @@ packages:
       - args: ['install', '-d', '@THIS_COLLECT_DIR@/bin']
         workdir: '@THIS_SOURCE_DIR@'
       - args: ['install', 'duk', '@THIS_COLLECT_DIR@/bin']
+        workdir: '@THIS_SOURCE_DIR@'
+
+  - name: tinyscheme
+    source:
+      subdir: 'ports'
+      url: 'https://mirror.dorper.me/echidnaos/pkg/tinyscheme/tinyscheme-1.41.tar.gz'
+      format: 'tar.gz'
+      extract_path: 'tinyscheme-1.41'
+      patch-path-strip: 1
+    tools_required:
+      - host-gcc
+    build:
+      - args: ['make']
+        workdir: '@THIS_SOURCE_DIR@'
+      - args: ['install', '-d', '@THIS_COLLECT_DIR@/bin']
+        workdir: '@THIS_SOURCE_DIR@'
+      - args: ['install', 'scheme', '@THIS_COLLECT_DIR@/bin']
         workdir: '@THIS_SOURCE_DIR@'

@@ -36,6 +36,7 @@ echidna.img: limine/limine-install kernel/echidna.elf shell/sh
 	echfs-utils initramfs.img import ./build/system-root/bin/bashbug /bin/bashbug
 	echfs-utils initramfs.img import ./build/system-root/bin/hello /bin/hello
 	echfs-utils initramfs.img import ./build/system-root/bin/duk /bin/duk
+	echfs-utils initramfs.img import ./build/system-root/bin/scheme /bin/scheme
 	#./copy-root-to-img.sh build/system-root/ initramfs.img
 	dd bs=$(IMGSIZE) count=0 seek=8192 if=/dev/zero of=echidna.img
 	parted -s echidna.img mklabel msdos

@@ -299,10 +299,10 @@ index 0000000..282953f
 +
 diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
-index 0000000..ebb8f66
+index 0000000..d4d52c3
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
-@@ -0,0 +1,215 @@
+@@ -0,0 +1,220 @@
 +
 +#include <bits/ensure.h>
 +#include <mlibc/debug.hpp>
@@ -515,6 +515,11 @@ index 0000000..ebb8f66
 +    int sys_sigprocmask(int how, const sigset_t *__restrict set, sigset_t *__restrict retrieve) {
 +        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
 +        return ENOSYS;
++    }
++
++    int sys_access(const char *path, int mode) {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return 0;
 +    }
 +} // namespace mlibc
 +

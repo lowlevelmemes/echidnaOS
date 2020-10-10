@@ -1,0 +1,44 @@
+diff -ru s/makefile tinyscheme-1.41/makefile
+--- s/makefile	2013-04-14 13:08:33.000000000 -0700
++++ tinyscheme-1.41/makefile	2020-10-09 21:28:58.327963914 -0700
+@@ -18,7 +18,7 @@
+ #AR= echo
+ 
+ # Unix, generally
+-CC = gcc -fpic -pedantic
++CC = i686-echidnaos-gcc
+ DEBUG=-g -Wall -Wno-char-subscripts -O
+ Osuf=o
+ SOsuf=so
+@@ -28,13 +28,14 @@
+ OUT = -o $@
+ RM= -rm -f
+ AR= ar crs
++LD = i686-echidnaos-gcc
+ 
+ # Linux
+-LD = gcc
+-LDFLAGS = -shared
+-DEBUG=-g -Wno-char-subscripts -O
+-SYS_LIBS= -ldl -lm
+-PLATFORM_FEATURES= -DSUN_DL=1
++#LD = gcc
++#LDFLAGS = -shared
++#DEBUG=-g -Wno-char-subscripts -O
++#SYS_LIBS= -ldl -lm
++#PLATFORM_FEATURES= -DSUN_DL=1
+ 
+ # Cygwin
+ #PLATFORM_FEATURES = -DUSE_STRLWR=0
+@@ -61,9 +62,9 @@
+ #LIBPREFIX = lib
+ #OUT = -o $@
+ 
+-FEATURES = $(PLATFORM_FEATURES) -DUSE_DL=1 -DUSE_MATH=1 -DUSE_ASCII_NAMES=0
++FEATURES = $(PLATFORM_FEATURES) -DUSE_DL=0 -DUSE_MATH=1 -DUSE_ASCII_NAMES=0
+ 
+-OBJS = scheme.$(Osuf) dynload.$(Osuf)
++OBJS = scheme.$(Osuf)
+ 
+ LIBTARGET = $(LIBPREFIX)tinyscheme.$(SOsuf)
+ STATICLIBTARGET = $(LIBPREFIX)tinyscheme.$(LIBsuf)
