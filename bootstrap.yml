@@ -170,7 +170,6 @@ packages:
         - '--libdir=lib'
         - '--buildtype=debugoptimized'
         - '-Dstatic=true'
-        - '-Dmlibc_no_headers=true'
         - '@THIS_SOURCE_DIR@'
     build:
       - args: ['ninja']
@@ -220,7 +219,7 @@ packages:
         workdir: '@THIS_SOURCE_DIR@'
       - args: ['make', 'DESTDIR=@THIS_COLLECT_DIR@', 'install']
         workdir: '@THIS_SOURCE_DIR@'
-  
+
   - name: duktape
     source:
       subdir: 'ports'

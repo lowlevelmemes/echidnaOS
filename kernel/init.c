@@ -18,9 +18,8 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     map_PIC(0x20, 0x28);
 
     // enable desc tables
-    load_GDT();
+    load_gdt();
     load_IDT();
-    load_TSS();
 
     #ifndef _BIG_FONTS_
       vga_80_x_50();

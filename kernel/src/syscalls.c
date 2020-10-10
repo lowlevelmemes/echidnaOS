@@ -3,6 +3,34 @@
 #include <kernel.h>
 #include <cio.h>
 
+uint16_t syscall_new_segment(uint32_t base, uint32_t page_count, int code) {
+    if (base + page_count * PAGE_SIZE >= task_table[current_task]->pages * PAGE_SIZE)
+        return -1;
+
+    size_t entry_count = task_table[current_task]->ldt_entries;
+    struct dt_entry *new_ldt = krealloc(task_table[current_task]->ldt, entry_count+1 * sizeof(struct dt_entry));
+
+    if (new_ldt == NULL)
+        return -1;
+
+    task_table[current_task]->ldt_entries++;
+    base += task_table[current_task]->base;
+
+    set_segment(new_ldt, entry_count, base, page_count);
+
+    new_ldt[entry_count].access      = code ? 0b11111010 : 0b11110010;
+    new_ldt[entry_count].granularity = 0b11001111;
+
+    task_table[current_task]->ldt = new_ldt;
+
+    load_ldt((uint32_t)task_table[current_task]->ldt,
+             task_table[current_task]->ldt_entries);
+
+    return (entry_count * sizeof(struct dt_entry)) |
+           (1 << 2) | // bit 2 means LDT
+           0x3;       // RPL = 3
+}
+
 void syscall_log(const char *msg) {
     msg += task_table[current_task]->base;
     for (size_t i = 0; msg[i]; i++)
@@ -374,8 +402,11 @@ int resize_heap(uint32_t heap_size) {
     task_table[current_task]->heap_size = heap_size;
 
     /* reload segments */
-    set_segment(0x3, task_table[current_task]->base, task_table[current_task]->pages);
-    set_segment(0x4, task_table[current_task]->base, task_table[current_task]->pages);
+    set_segment(gdt, 0x3, task_table[current_task]->base, task_table[current_task]->pages);
+    set_segment(gdt, 0x4, task_table[current_task]->base, task_table[current_task]->pages);
+
+    load_ldt((uint32_t)task_table[current_task]->ldt,
+             task_table[current_task]->ldt_entries);
 
     return 0;
 }

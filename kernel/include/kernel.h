@@ -31,7 +31,7 @@
 #define INITRAMFS_BASE 0x1000000
 #define INITRAMFS_SIZE 0x800000
 
-#define KRNL_MEMORY_BASE (INITRAMFS_BASE + INITRAMFS_SIZE)
+#define KRNL_MEMORY_BASE 0x1000000
 #define KRNL_MAX_TASKS 65536
 
 #define DEFAULT_STACK 0x10000
@@ -110,6 +110,17 @@
                     "hlt;"      \
                     "jmp 1b;"   \
                  )
+
+struct dt_entry {
+    uint16_t limit_low;
+    uint16_t base_low;
+    uint8_t base_mid;
+    uint8_t access;
+    uint8_t granularity;
+    uint8_t base_high;
+} __attribute__((packed));
+
+extern struct dt_entry gdt[];
 
 // builtins
 
@@ -211,7 +222,6 @@ typedef struct {
 } cpu_t;
 
 typedef struct {
-
     int status;
     int parent;
 
@@ -242,6 +252,9 @@ typedef struct {
 
     uint32_t heap_base;
     uint32_t heap_size;
+
+    struct dt_entry *ldt;
+    size_t ldt_entries;
 
     // signals
     uint32_t sigabrt;
@@ -371,15 +384,6 @@ typedef struct {
 } heap_chunk_t;
 
 typedef struct {
-    uint16_t limit_low;
-    uint16_t base_low;
-    uint8_t base_mid;
-    uint8_t access;
-    uint8_t granularity;
-    uint8_t base_high;
-} __attribute__((packed)) GDT_entry_t;
-
-typedef struct {
     uint32_t cursor_offset;
     int cursor_status;
     uint8_t cursor_palette;
@@ -455,9 +459,9 @@ void init_pic(void);
 
 void set_pit_freq(uint32_t frequency);
 
-void load_GDT(void);
-void load_TSS(void);
-void set_segment(uint16_t entry, uint32_t base, uint32_t page_count);
+void load_gdt(void);
+void set_segment(struct dt_entry *dt, uint16_t entry, uint32_t base, uint32_t page_count);
+void load_ldt(uint32_t base, uint32_t page_count);
 
 void load_IDT(void);
 

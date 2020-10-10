@@ -61,6 +61,7 @@ extern get_heap_base
 extern get_heap_size
 extern resize_heap
 extern syscall_log
+extern syscall_new_segment
 
 section .data
 
@@ -75,7 +76,7 @@ routine_list:
         dd      0                       ; 0x03
         dd      syscall_log             ; 0x04
         dd      0 ;task_fork            ; 0x05 - dummy entry
-        dd      0                       ; 0x06
+        dd      syscall_new_segment     ; 0x06
         dd      0                       ; 0x07
         dd      ipc_send_packet         ; 0x08
         dd      ipc_read_packet         ; 0x09

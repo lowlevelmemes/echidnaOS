@@ -119,6 +119,10 @@ void task_fork(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t 
         new_process.file_handles_v2[i] = new_handle;
     }
 
+    // clone the LDT
+    memcpy(new_process.ldt, task_table[current_task]->ldt,
+           task_table[current_task]->ldt_entries * sizeof(struct dt_entry));
+
     // clone the process's memory
     memcpy((char*)new_process.base, (char*)task_table[current_task]->base, task_size);
 
@@ -208,6 +212,9 @@ int general_execute(task_info_t* task_info) {
 
     task_table[new_pid]->heap_base = new_task.pages * PAGE_SIZE;
     task_table[new_pid]->heap_size = 0;
+
+    task_table[new_pid]->ldt = NULL;
+    task_table[new_pid]->ldt_entries = 0;
 
     kstrcpy(task_table[new_pid]->pwd, pwd);
     kstrcpy(task_table[new_pid]->name, name);
@@ -464,8 +471,10 @@ void task_scheduler(void) {
                 }
             case KRN_STAT_ACTIVE_TASK:
                 idle_cpu = 0;
-                set_segment(0x3, task_table[current_task]->base, task_table[current_task]->pages);
-                set_segment(0x4, task_table[current_task]->base, task_table[current_task]->pages);
+                set_segment(gdt, 0x3, task_table[current_task]->base, task_table[current_task]->pages);
+                set_segment(gdt, 0x4, task_table[current_task]->base, task_table[current_task]->pages);
+                load_ldt((uint32_t)task_table[current_task]->ldt,
+                         task_table[current_task]->ldt_entries);
                 task_spinup((void*)task_table[current_task]);
             case KRN_STAT_IPCWAIT_TASK:
             case KRN_STAT_PROCWAIT_TASK:

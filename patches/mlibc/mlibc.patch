@@ -701,10 +701,10 @@ index 0000000..f1a985e
 \ No newline at end of file
 diff --git a/mlibc-workdir/sysdeps/echidnaos/include/sys_api.h b/mlibc-workdir/sysdeps/echidnaos/include/sys_api.h
 new file mode 100644
-index 0000000..af0a346
+index 0000000..2de85d3
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/include/sys_api.h
-@@ -0,0 +1,425 @@
+@@ -0,0 +1,438 @@
 +/*
 + *  echidnaOS kernel API
 + */
@@ -749,6 +749,19 @@ index 0000000..af0a346
 +#define ECH_SEEK_SET 0
 +#define ECH_SEEK_END 1
 +#define ECH_SEEK_CUR 2
++
++#define OS_new_segment(arg1, arg2, arg3) ({  \
++    uint16_t return_val;                            \
++    uint32_t discard; \
++    asm volatile (  "movl $0x06, %%eax\n\t"    \
++                    "int $0x80\n\t"         \
++                     : "=a" (return_val), "=d"(discard)   \
++                     : "c" (arg1),  \
++                       "d" (arg2), \
++                       "D" (arg3) \
++                     :  );         \
++    return_val;                                \
++})
 +
 +#define OS_open(path, flags, mode) ({  \
 +    int return_val;                            \

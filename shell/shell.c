@@ -68,6 +68,12 @@ int main(int argc, char** argv) {
             OS_resize_heap(0x100);
         }
 
+        else if (!strcmp("segm", s_argv[0])) {
+            uint16_t seg = OS_new_segment(0x10, 1, 0);
+            printf("created LDT segment: 0x%04x\n", seg);
+            asm volatile ("mov %0, %%fs" :: "r"(seg): "memory");
+        }
+
         else if (!strcmp("col", s_argv[0]))
             puts("\e[40m \e[41m \e[42m \e[43m \e[44m \e[45m \e[46m \e[47m \e[40m");
 
