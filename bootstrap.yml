@@ -254,3 +254,35 @@ packages:
         workdir: '@THIS_SOURCE_DIR@'
       - args: ['install', 'scheme', '@THIS_COLLECT_DIR@/bin']
         workdir: '@THIS_SOURCE_DIR@'
+
+  - name: bbfv3
+    source:
+      subdir: 'ports'
+      url: 'https://mirror.dorper.me/echidnaos/pkg/bbfv3/bbfv3.tar.gz'
+      format: 'tar.gz'
+      extract_path: 'bbfv3'
+      patch-path-strip: 1
+    tools_required:
+      - host-gcc
+    build:
+      - args: ['make']
+        workdir: '@THIS_SOURCE_DIR@'
+      - args: ['install', '-d', '@THIS_COLLECT_DIR@/bin']
+        workdir: '@THIS_SOURCE_DIR@'
+      - args: ['install', 'forth', '@THIS_COLLECT_DIR@/bin']
+        workdir: '@THIS_SOURCE_DIR@'
+
+  - name: bf
+    source:
+      subdir: 'ports'
+      url: 'https://github.com/kgabis/brainfuck-c/archive/master.tar.gz'
+      format: 'tar.gz'
+      extract_path: 'brainfuck-c-master'
+      patch-path-strip: 1
+    tools_required:
+      - host-gcc
+    build:
+      - args: ['make']
+        workdir: '@THIS_SOURCE_DIR@'
+      - args: ['make', 'DESTDIR=@THIS_COLLECT_DIR@', 'install']
+        workdir: '@THIS_SOURCE_DIR@'

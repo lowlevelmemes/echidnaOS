@@ -1,0 +1,19 @@
+--- brainfuck-c-master-o/Makefile	2017-04-02 02:07:48.000000000 -0700
++++ brainfuck-c-master/Makefile	2020-10-10 01:47:44.477963514 -0700
+@@ -1,4 +1,5 @@
+-PREFIX ?= /usr/local
++CC=i686-echidnaos-gcc
++PREFIX ?= /
+ SRC = brainfuck.c
+ CFLAGS = -std=c99 -Wall -pedantic
+ BIN = bf
+@@ -9,7 +10,8 @@
+ 	$(CC) $(SRC) $(CFLAGS) -o $@
+ 
+ install: $(BIN)
+-	install $(BIN) $(PREFIX)/bin
++	install -d $(DESTDIR)/$(PREFIX)/bin/
++	install $(BIN) $(DESTDIR)/$(PREFIX)/bin/
+ 
+ clean:
+ 	rm -f $(BIN)
