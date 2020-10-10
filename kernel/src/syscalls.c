@@ -342,7 +342,7 @@ uint32_t ipc_read_packet(char* payload) {
     uint32_t pid = task_table[current_task]->ipc_queue[0].sender;
 
     // push the queue back
-    for (uint32_t i = (task_table[current_task]->ipc_queue_ptr - 1); i; i--)
+    for (int i = (task_table[current_task]->ipc_queue_ptr - 1); i; i--)
         task_table[pid]->ipc_queue[i-1] = task_table[pid]->ipc_queue[i];
 
     // free queue entry

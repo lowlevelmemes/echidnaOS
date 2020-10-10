@@ -49,6 +49,6 @@ int pcspk_io_wrapper(uint32_t unused0, uint64_t unused1, int type, uint8_t paylo
 }
 
 void init_pcspk(void) {
-    kernel_add_device("pc speaker", 0, 0, &pcspk_io_wrapper);
+    kernel_add_device("pcspkr", 0, 0, &pcspk_io_wrapper);
     return;
 }

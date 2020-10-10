@@ -57,7 +57,7 @@ void keyboard_init(void) {
     while (port_in_b(0x64) & 0x02);
     port_out_b(0x60, led_status);
     */
-    kernel_add_device("ps2 keyboard", 0, 0, &keyboard_io_wrapper);
+    kernel_add_device("keyboard", 0, 0, &keyboard_io_wrapper);
     return;
 }
 

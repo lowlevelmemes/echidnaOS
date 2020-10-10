@@ -2,9 +2,9 @@
 #include <kernel.h>
 
 static char* tty_names[] = {
-    "tty 0", "tty 1", "tty 2", "tty 3",
-    "tty 4", "tty 5", "tty 6", "tty 7",
-    "tty 8", "tty 9", "tty 10", "tty 11"
+    "tty0", "tty1", "tty2", "tty3",
+    "tty4", "tty5", "tty6", "tty7",
+    "tty8", "tty9", "tty10", "tty11"
 };
 
 int tty_io_wrapper(uint32_t tty, uint64_t unused, int type, uint8_t payload) {

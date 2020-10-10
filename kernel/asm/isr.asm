@@ -208,9 +208,17 @@ keyboard_isr:
         mov es, ax
         xor eax, eax
         in al, 0x60     ; read from keyboard
+        cmp al, 0x01
+        jne .notpausebreak
+        ;push 0
+        ;call task_quit_self
+        ;add esp, 4
+        jmp .continue
+.notpausebreak:
         push eax
         call keyboard_handler
         add esp, 4
+.continue:
         mov al, 0x20    ; acknowledge interrupt to PIC0
         out 0x20, al
         pop es

@@ -137,7 +137,7 @@ void* kalloc(uint32_t size) {
     }
     
     // zero the memory
-    for (uint32_t i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
         area[i] = 0;
     return (void*)area;
 }

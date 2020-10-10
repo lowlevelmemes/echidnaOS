@@ -471,7 +471,7 @@ int echfs_list(char* path, vfs_metadata_t* metadata, uint32_t entry, char* dev) 
             id = path_result.target.payload;
     }
     
-    for (uint32_t i = 0; i <= entry; i++) {
+    for (int i = 0; i <= entry; i++) {
 next:
         read_entry = rd_entry(ii);
         if ((!kstrcmp(read_entry.name, ".")) || (!kstrcmp(read_entry.name, ".."))) { ii++; goto next; }

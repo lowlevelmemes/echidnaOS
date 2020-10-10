@@ -294,8 +294,7 @@ void switch_tty(uint8_t which_tty) {
 }
 
 void init_tty(void) {
-    uint32_t i;
-    for (i=0; i<KRNL_TTY_COUNT; i++) {
+    for (uint32_t i=0; i<KRNL_TTY_COUNT; i++) {
         tty[i].esc_value = &tty[i].esc_value0;
         tty[i].esc_value0 = 0;
         tty[i].esc_value1 = 0;

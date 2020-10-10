@@ -43,6 +43,6 @@ void init_streams(void) {
     kernel_add_device("stdout", 0, 0, &stdout_io_wrapper);
     kernel_add_device("stderr", 0, 0, &stderr_io_wrapper);
     kernel_add_device("null", 0, 0, &null_io_wrapper);
-    kernel_add_device("zerro", 0, 0, &zero_io_wrapper);
+    kernel_add_device("zero", 0, 0, &zero_io_wrapper);
     return;
 }

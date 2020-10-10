@@ -30,13 +30,13 @@ static uint64_t cached_block;
 static uint8_t disk_cache[CACHE_SIZE];
 
 static char* bios_harddrive_names[] = {
-    "bios drive 0", "bios drive 1", "bios drive 2", "bios drive 3",
-    "bios drive 4", "bios drive 5", "bios drive 6", "bios drive 7",
-    "bios drive 8", "bios drive 9", "bios drive 10", "bios drive 11",
-    "bios drive 12", "bios drive 13", "bios drive 14", "bios drive 15",
-    "bios drive 16", "bios drive 17", "bios drive 18", "bios drive 19",
-    "bios drive 20", "bios drive 21", "bios drive 22", "bios drive 23",
-    "bios drive 24", "bios drive 25", "bios drive 26"
+    "bd0", "bd1", "bd2", "bd3",
+    "bd4", "bd5", "bd6", "bd7",
+    "bd8", "bd9", "bd10", "bd11",
+    "bd12", "bd13", "bd14", "bd15",
+    "bd16", "bd17", "bd18", "bd19",
+    "bd20", "bd21", "bd22", "bd23",
+    "bd24", "bd25", "bd26"
 };
 
 uint8_t bios_harddisk_read(uint8_t drive, uint64_t loc);

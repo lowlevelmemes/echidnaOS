@@ -129,7 +129,7 @@ int vfs_kread(char* path, uint64_t loc) {
     if (!kstrncmp(path, ":://", 4)) {
     // read from dev directly
         path += 4;
-        for (int i = 0; i < device_ptr; i++) {
+        for (uint32_t i = 0; i < device_ptr; i++) {
             if (!kstrcmp(path, device_list[i].name))
                 return (int)(*device_list[i].io_wrapper)(device_list[i].gp_value, loc, 0, 0);
         }
@@ -230,7 +230,7 @@ int vfs_kwrite(char* path, uint64_t loc, uint8_t val) {
     if (!kstrncmp(path, ":://", 4)) {
     // write to dev directly
         path += 4;
-        for (int i = 0; i < device_ptr; i++) {
+        for (uint32_t i = 0; i < device_ptr; i++) {
             if (!kstrcmp(path, device_list[i].name))
                 return (int)(*device_list[i].io_wrapper)(device_list[i].gp_value, loc, 1, val);
         }
