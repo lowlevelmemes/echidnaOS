@@ -14,10 +14,10 @@ int create_file_handle(int pid, file_handle_t handle) {
 
     task_table[pid]->file_handles = krealloc(task_table[pid]->file_handles, (task_table[pid]->file_handles_ptr + 1) * sizeof(file_handle_t));
     handle_n = task_table[pid]->file_handles_ptr++;
-    
+
 load_handle:
     task_table[pid]->file_handles[handle_n] = handle;
-    
+
     return handle_n;
 
 }
@@ -35,21 +35,12 @@ int create_file_handle_v2(int pid, file_handle_v2_t handle) {
 
     task_table[pid]->file_handles_v2 = krealloc(task_table[pid]->file_handles_v2, (task_table[pid]->file_handles_v2_ptr + 1) * sizeof(file_handle_v2_t));
     handle_n = task_table[pid]->file_handles_v2_ptr++;
-    
+
 load_handle:
     task_table[pid]->file_handles_v2[handle_n] = handle;
-    
+
     return handle_n;
 
-}
-
-void kmemcpy(char* dest, char* source, uint32_t count) {
-    uint32_t i;
-
-    for (i = 0; i < count; i++)
-        dest[i] = source[i];
-
-    return;
 }
 
 void kstrcpy(char* dest, char* source) {
@@ -57,7 +48,7 @@ void kstrcpy(char* dest, char* source) {
 
     for ( ; source[i]; i++)
         dest[i] = source[i];
-    
+
     dest[i] = 0;
 
     return;
@@ -92,7 +83,7 @@ uint32_t kstrlen(char* str) {
 void init_kalloc(void) {
     // creates the first memory chunk
     heap_chunk_t* root_chunk = (heap_chunk_t*)KRNL_MEMORY_BASE;
-    
+
     root_chunk->free = 1;
     root_chunk->size = memory_size - KRNL_MEMORY_BASE - sizeof(heap_chunk_t);
     root_chunk->prev_chunk = 0;
@@ -105,7 +96,7 @@ void* kalloc(uint32_t size) {
     heap_chunk_t* heap_chunk = (heap_chunk_t*)KRNL_MEMORY_BASE;
     uint32_t heap_chunk_ptr;
     char* area;
-    
+
     // avoid odd memory allocations, align at 4
     while (size % 4) size++;
 
@@ -135,7 +126,7 @@ void* kalloc(uint32_t size) {
             continue;
         }
     }
-    
+
     // zero the memory
     for (int i = 0; i < size; i++)
         area[i] = 0;
@@ -150,42 +141,42 @@ void* krealloc(void* addr, uint32_t new_size) {
     }
 
     uint32_t heap_chunk_ptr = (uint32_t)addr;
-    
+
     heap_chunk_ptr -= sizeof(heap_chunk_t);
     heap_chunk_t* heap_chunk = (heap_chunk_t*)heap_chunk_ptr;
-    
+
     char* new_ptr;
     if ((new_ptr = kalloc(new_size)) == 0)
         return (void*)0;
-        
+
     while (new_size % 4) new_size++;
-    
+
     if (heap_chunk->size > new_size)
-        kmemcpy(new_ptr, (char*)addr, new_size);
+        memcpy(new_ptr, (char*)addr, new_size);
     else
-        kmemcpy(new_ptr, (char*)addr, heap_chunk->size);
-    
+        memcpy(new_ptr, (char*)addr, heap_chunk->size);
+
     kfree(addr);
-    
+
     return new_ptr;
 }
 
 void kfree(void* addr) {
     uint32_t heap_chunk_ptr = (uint32_t)addr;
-    
+
     heap_chunk_ptr -= sizeof(heap_chunk_t);
     heap_chunk_t* heap_chunk = (heap_chunk_t*)heap_chunk_ptr;
-    
+
     heap_chunk_ptr += heap_chunk->size + sizeof(heap_chunk_t);
     heap_chunk_t* next_chunk = (heap_chunk_t*)heap_chunk_ptr;
-    
+
     heap_chunk_t* prev_chunk = (heap_chunk_t*)heap_chunk->prev_chunk;
-    
+
     // flag chunk as free
     heap_chunk->free = 1;
-    
+
     if ((uint32_t)next_chunk >= memory_size) goto skip_next_chunk;
-    
+
     // if the next chunk is free as well, fuse the chunks into a single one
     if (next_chunk->free) {
         heap_chunk->size += next_chunk->size + sizeof(heap_chunk_t);
@@ -205,7 +196,7 @@ skip_next_chunk:
                 next_chunk->prev_chunk = (uint32_t)prev_chunk;
         }
     }
-    
+
     return;
 }
 
@@ -229,7 +220,7 @@ void kputs(const char* string) {
     #else
       tty_kputs(string, 0);
     #endif
-    
+
     return;
 }
 

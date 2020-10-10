@@ -282,7 +282,7 @@ void ipc_send_packet(uint32_t pid, char* payload, uint32_t len) {
     task_table[pid]->ipc_queue = krealloc(task_table[pid]->ipc_queue, (task_table[pid]->ipc_queue_ptr + 1) * sizeof(ipc_packet_t));
 
     task_table[pid]->ipc_queue[task_table[pid]->ipc_queue_ptr].payload = kalloc(len);
-    kmemcpy(task_table[pid]->ipc_queue[task_table[pid]->ipc_queue_ptr].payload, payload, len);
+    memcpy(task_table[pid]->ipc_queue[task_table[pid]->ipc_queue_ptr].payload, payload, len);
 
     task_table[pid]->ipc_queue[task_table[pid]->ipc_queue_ptr].length = len;
     task_table[pid]->ipc_queue[task_table[pid]->ipc_queue_ptr++].sender = current_task;
@@ -335,7 +335,7 @@ uint32_t ipc_read_packet(char* payload) {
 
     payload += task_table[current_task]->base;
 
-    kmemcpy(payload, task_table[current_task]->ipc_queue[0].payload, task_table[current_task]->ipc_queue[0].length);
+    memcpy(payload, task_table[current_task]->ipc_queue[0].payload, task_table[current_task]->ipc_queue[0].length);
 
     kfree(task_table[current_task]->ipc_queue[0].payload);
 

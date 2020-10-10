@@ -92,7 +92,7 @@ void keyboard_handler(uint8_t input_byte) {
                 break;
         }
     }
-    
+
     // ctrl sequences handling
     if (ctrl_active) {
         switch (input_byte) {
@@ -125,7 +125,7 @@ void keyboard_handler(uint8_t input_byte) {
     else if (tty[current_tty].kb_l1_buffer_index < KB_L1_SIZE) {
 
         if (input_byte < MAX_CODE) {
-            
+
             if (!capslock_active && !shift_active)
                 c = ascii_nomod[input_byte];
 
@@ -137,29 +137,29 @@ void keyboard_handler(uint8_t input_byte) {
 
             else
                 c = ascii_capslock[input_byte];
-            
+
             if (tty[current_tty].raw) {
                 tty[current_tty].kb_l2_buffer[tty[current_tty].kb_l2_buffer_index++] = c;
                 return;
             }
-            
+
             if (c == '\b') {
                 if (!tty[current_tty].kb_l1_buffer_index) return;
                 text_putchar(c, current_tty);
                 tty[current_tty].kb_l1_buffer[tty[current_tty].kb_l1_buffer_index--] = 0;
             }
-            
+
             else if (c == '\n') {
                 text_putchar(c, current_tty);
                 tty[current_tty].kb_l1_buffer[tty[current_tty].kb_l1_buffer_index++] = c;
-                kmemcpy(&tty[current_tty].kb_l2_buffer[tty[current_tty].kb_l2_buffer_index],
+                memcpy(&tty[current_tty].kb_l2_buffer[tty[current_tty].kb_l2_buffer_index],
                         tty[current_tty].kb_l1_buffer,
                         tty[current_tty].kb_l1_buffer_index + 1);
                 tty[current_tty].kb_l2_buffer_index += tty[current_tty].kb_l1_buffer_index;
                 tty[current_tty].kb_l1_buffer[0] = 0;
                 tty[current_tty].kb_l1_buffer_index = 0;
             }
-            
+
             else {
                 text_putchar(c, current_tty);
                 tty[current_tty].kb_l1_buffer[tty[current_tty].kb_l1_buffer_index++] = c;

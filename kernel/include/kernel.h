@@ -3,6 +3,7 @@
 #ifndef __KERNEL_H__
 #define __KERNEL_H__
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stivale.h>
 
@@ -84,7 +85,7 @@
 #define DF_BEEP                 DFUN(DC_AUDIO,0)
 #define DF_SET_MASK             DFUN(DC_PIC,0)
 #define DF_GET_MASK             DFUN(DC_PIC,1)
-#define DF_SET_FREQ             DFUN(DC_TIMER,0)    
+#define DF_SET_FREQ             DFUN(DC_TIMER,0)
 
 // signals
 
@@ -109,6 +110,13 @@
                     "hlt;"      \
                     "jmp 1b;"   \
                  )
+
+// builtins
+
+void *memset(void *, int, size_t);
+void *memcpy(void *, const void *, size_t);
+int memcmp(const void *, const void *, size_t);
+void *memmove(void *, const void *, size_t);
 
 // driver inits
 
@@ -150,7 +158,6 @@ void tty_kxtoa(uint64_t x, uint8_t which_tty);
 
 int kstrcmp(char* dest, char* source);
 int kstrncmp(char* dest, char* source, uint32_t len);
-void kmemcpy(char* dest, char* source, uint32_t count);
 void kstrcpy(char* dest, char* source);
 uint32_t kstrlen(char* str);
 
@@ -207,20 +214,20 @@ typedef struct {
 
     int status;
     int parent;
-    
+
     uint32_t base;
     uint32_t pages;
 
     cpu_t cpu;
-    
+
     char pwd[2048];
     char name[128];
     char server_name[128];
-    
+
     char stdin[2048];
     char stdout[2048];
     char stderr[2048];
-    
+
     char iowait_dev[2048];
     uint64_t iowait_loc;
     int iowait_type;
@@ -229,13 +236,13 @@ typedef struct {
     uint32_t iowait_ptr;
     int iowait_len;
     int iowait_done;
-    
+
     ipc_packet_t* ipc_queue;
     uint32_t ipc_queue_ptr;
-    
+
     uint32_t heap_base;
     uint32_t heap_size;
-    
+
     // signals
     uint32_t sigabrt;
     uint32_t sigfpe;
@@ -243,7 +250,7 @@ typedef struct {
     uint32_t sigint;
     uint32_t sigsegv;
     uint32_t sigterm;
-    
+
     file_handle_t* file_handles;
     int file_handles_ptr;
 

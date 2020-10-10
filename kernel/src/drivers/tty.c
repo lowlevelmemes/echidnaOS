@@ -142,7 +142,7 @@ void sgr(uint8_t which_tty) {
 }
 
 void escape_parse(char c, uint8_t which_tty) {
-    
+
     if (c >= '0' && c <= '9') {
         *tty[which_tty].esc_value *= 10;
         *tty[which_tty].esc_value += c - '0';
@@ -236,7 +236,7 @@ void escape_parse(char c, uint8_t which_tty) {
             text_putchar('?', which_tty);
             break;
     }
-    
+
     tty[which_tty].esc_value = &tty[which_tty].esc_value0;
     tty[which_tty].esc_value0 = 0;
     tty[which_tty].esc_value1 = 0;
@@ -320,6 +320,6 @@ void init_tty(void) {
 
 void tty_refresh(uint8_t which_tty) {
     if (which_tty == current_tty)
-        kmemcpy(video_mem, tty[current_tty].field, VD_ROWS*VD_COLS);
+        memcpy(video_mem, tty[current_tty].field, VD_ROWS*VD_COLS);
     return;
 }

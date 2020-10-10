@@ -95,7 +95,7 @@ void task_fork(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t 
     }
 
     // clone the parent's file descriptors
-    kmemcpy((char*)new_process.file_handles, (char*)task_table[current_task]->file_handles, task_table[current_task]->file_handles_ptr * sizeof(file_handle_t));
+    memcpy((char*)new_process.file_handles, (char*)task_table[current_task]->file_handles, task_table[current_task]->file_handles_ptr * sizeof(file_handle_t));
 
     // allocate memory for the new VFS's file descriptors
     if (!(new_process.file_handles_v2 = kalloc(task_table[current_task]->file_handles_v2_ptr * sizeof(file_handle_v2_t)))) {
@@ -120,7 +120,7 @@ void task_fork(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t 
     }
 
     // clone the process's memory
-    kmemcpy((char*)new_process.base, (char*)task_table[current_task]->base, task_size);
+    memcpy((char*)new_process.base, (char*)task_table[current_task]->base, task_size);
 
     // attempt to create task
     int new_pid = task_create(new_process);
@@ -322,7 +322,7 @@ uint32_t task_start(task_info_t* task_info) {
     }
 
     // copy task code into the running location
-    kmemcpy((char*)(task_table[new_task]->base + TASK_RESERVED_SPACE), (char*)task_addr, task_info->size);
+    memcpy((char*)(task_table[new_task]->base + TASK_RESERVED_SPACE), (char*)task_addr, task_info->size);
 
     // build first heap chunk identifier
     task_table[new_task]->heap_begin = (void*)(task_table[new_task]->base + TASK_RESERVED_SPACE + task_info->size + task_info->stack);
