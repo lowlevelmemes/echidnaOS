@@ -104,11 +104,11 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     // launch the shell
     kputs("\nKERNEL INIT DONE!\n");
     kstrcpy(tty_path, "/dev/tty0");
-    general_execute(&shell_exec);/*
+    general_execute(&shell_exec);
     kstrcpy(tty_path, "/dev/tty1");
     general_execute(&shell_exec);
     kstrcpy(tty_path, "/dev/tty2");
-    general_execute(&shell_exec);*/
+    general_execute(&shell_exec);
 
     // wait for task scheduler
     ts_enable = 1;

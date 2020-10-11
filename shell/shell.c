@@ -155,10 +155,10 @@ int main(int argc, char** argv) {
                 printf("handle closed\n");
         }
 
-        else if (!strcmp("div0", s_argv[0])) {/*
-            int a = 0;
+        else if (!strcmp("div0", s_argv[0])) {
+            volatile int a = 0;
             a = a / 0;
-*/        }
+        }
 
         else if (!strcmp("esc", s_argv[0])) {
             if (s_argc == 1) continue;

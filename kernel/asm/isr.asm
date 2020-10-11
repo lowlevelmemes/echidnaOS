@@ -165,11 +165,21 @@ routine_list:
 dd raise_exception_%1
 %endmacro
 
+%macro raise_exception_err_getaddr 1
+dd raise_exception_err_%1
+%endmacro
+
 global exception_thunks
 exception_thunks:
 %assign i 0
 %rep 32
-raise_exception_getaddr i
+
+%if i == 8 || (i >= 10 && i <= 14) || i == 17 || i == 30
+    raise_exception_err_getaddr i
+%else
+    raise_exception_getaddr i
+%endif
+
 %assign i i+1
 %endrep
 
@@ -177,9 +187,8 @@ section .text
 
 bits 32
 
-%macro raise_exception 1
-align 16
-raise_exception_%1:
+%macro raise_exception_err 1
+raise_exception_err_%1:
     push dword [esp+5*4]
     push dword [esp+5*4]
     push dword [esp+5*4]
@@ -193,6 +202,25 @@ raise_exception_%1:
     mov gs, ax
     mov eax, esp
     push dword [esp+20*4]
+    push 1
+    push eax
+    push %1
+    call exception_handler
+    popam
+    iretd
+%endmacro
+
+%macro raise_exception 1
+raise_exception_%1:
+    pusham
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov eax, esp
+    push 0
+    push 0
     push eax
     push %1
     call exception_handler
@@ -203,6 +231,12 @@ raise_exception_%1:
 %assign i 0
 %rep 32
 raise_exception i
+%assign i i+1
+%endrep
+
+%assign i 0
+%rep 32
+raise_exception_err i
 %assign i i+1
 %endrep
 

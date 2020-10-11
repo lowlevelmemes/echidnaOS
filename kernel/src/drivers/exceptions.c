@@ -35,7 +35,7 @@ static const char *exception_names[] = {
     "Security"
 };
 
-void exception_handler(int exception_number, struct gpr_state *state, uint32_t error_code) {
+void exception_handler(int exception_number, struct gpr_state *state, int has_error_code, uint32_t error_code) {
     tty_kputs("\n", 0);
     tty_kputs(exception_names[exception_number], 0);
 
@@ -44,15 +44,17 @@ void exception_handler(int exception_number, struct gpr_state *state, uint32_t e
     text_putchar(':', 0);
     tty_kxtoa(state->eip, 0);
 
-    tty_kputs("\nError code: ", 0);
-    tty_kxtoa(error_code, 0);
+    if (has_error_code) {
+        tty_kputs("\nError code: ", 0);
+        tty_kxtoa(error_code, 0);
+    }
 
     if (state->cs == 0x08) {
         tty_kputs("\nIn-kernel exception, system halted.", 0);
         for (;;)
             asm volatile ("hlt");
     }
-for (;;);
+
     tty_kputs("\nTask terminated.\n", 0);
     task_quit(current_task, -1);
 }
