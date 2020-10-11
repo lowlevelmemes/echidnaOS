@@ -357,16 +357,12 @@ syscall:
         mov es, bx
         mov fs, bx
         mov gs, bx
-        mov ebx, 4
-        push edx
-        mul ebx
-        pop edx
         ; push syscall args, and call
         push esi
         push edi
         push edx
         push ecx
-        call [routine_list+eax]
+        call [routine_list+eax*4]
         add esp, 16
         ; disable all interrupts, reenable task switch
         cli

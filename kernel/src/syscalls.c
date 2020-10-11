@@ -19,12 +19,11 @@ uint16_t syscall_new_segment(uint32_t base, uint32_t page_count, int code) {
     set_segment(new_ldt, entry_count, base, page_count);
 
     new_ldt[entry_count].access      = code ? 0b11111010 : 0b11110010;
-    new_ldt[entry_count].granularity = 0b11001111;
+    new_ldt[entry_count].granularity = 0b11000000;
 
     task_table[current_task]->ldt = new_ldt;
 
-    load_ldt((uint32_t)task_table[current_task]->ldt,
-             task_table[current_task]->ldt_entries);
+    load_ldt((uint32_t)new_ldt, task_table[current_task]->ldt_entries);
 
     return (entry_count * sizeof(struct dt_entry)) |
            (1 << 2) | // bit 2 means LDT
