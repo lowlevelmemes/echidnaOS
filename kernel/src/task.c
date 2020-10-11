@@ -24,7 +24,7 @@ static int idle_cpu = 1;
 
 void task_spinup(void*);
 
-static const cpu_t default_cpu_status = { 0,0,0,0,0,0,0,0,0,0x1b,0x23,0x23,0x23,0x23,0x23,0x202 };
+static const struct gpr_state default_cpu_status = { 0,0,0,0,0,0,0, 0x33,0x33,0x33,0x33, 0,0x2b,0x1202,0,0x33};
 
 int task_create(task_t new_task) {
     // find an empty entry in the task table
@@ -369,24 +369,8 @@ uint32_t task_start(task_info_t* task_info) {
     return new_task;
 }
 */
-void task_switch(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi, uint32_t ebp, uint32_t ds, uint32_t es, uint32_t fs, uint32_t gs, uint32_t eip, uint32_t cs, uint32_t eflags, uint32_t esp, uint32_t ss) {
-
-    task_table[current_task]->cpu.eax = eax;
-    task_table[current_task]->cpu.ebx = ebx;
-    task_table[current_task]->cpu.ecx = ecx;
-    task_table[current_task]->cpu.edx = edx;
-    task_table[current_task]->cpu.esi = esi;
-    task_table[current_task]->cpu.edi = edi;
-    task_table[current_task]->cpu.ebp = ebp;
-    task_table[current_task]->cpu.esp = esp;
-    task_table[current_task]->cpu.eip = eip;
-    task_table[current_task]->cpu.cs = cs;
-    task_table[current_task]->cpu.ds = ds;
-    task_table[current_task]->cpu.es = es;
-    task_table[current_task]->cpu.fs = fs;
-    task_table[current_task]->cpu.gs = gs;
-    task_table[current_task]->cpu.ss = ss;
-    task_table[current_task]->cpu.eflags = eflags;
+void task_switch(struct gpr_state *cpu) {
+    task_table[current_task]->cpu = *cpu;
 
     current_task++;
     task_scheduler();
@@ -471,11 +455,11 @@ void task_scheduler(void) {
                 }
             case KRN_STAT_ACTIVE_TASK:
                 idle_cpu = 0;
-                set_segment(gdt, 0x3, task_table[current_task]->base, task_table[current_task]->pages);
-                set_segment(gdt, 0x4, task_table[current_task]->base, task_table[current_task]->pages);
+                set_segment(gdt, 0x5, task_table[current_task]->base, task_table[current_task]->pages);
+                set_segment(gdt, 0x6, task_table[current_task]->base, task_table[current_task]->pages);
                 load_ldt((uint32_t)task_table[current_task]->ldt,
                          task_table[current_task]->ldt_entries);
-                task_spinup((void*)task_table[current_task]);
+                task_spinup(&task_table[current_task]->cpu);
             case KRN_STAT_IPCWAIT_TASK:
             case KRN_STAT_PROCWAIT_TASK:
             case KRN_STAT_VDEVWAIT_TASK:
@@ -510,5 +494,6 @@ void task_quit(int pid, int64_t return_value) {
     task_table[pid] = EMPTY_PID;
     DISABLE_INTERRUPTS;
     ts_enable = 1;
+    escalate_privilege();
     task_scheduler();
 }

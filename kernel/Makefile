@@ -1,5 +1,5 @@
 CC = i686-echidnaos-gcc
-PREFIX = 
+PREFIX =
 
 C_FILES = init.c $(shell find src -type f -name '*.c')
 H_FILES = $(shell find . -type f -name '*.h')
@@ -10,6 +10,7 @@ BINS = $(REAL_FILES:.real=.bin)
 
 CHARDFLAGS = \
     -std=gnu99 \
+    -fplan9-extensions \
     -masm=intel \
     -ffreestanding \
     -fno-stack-protector \

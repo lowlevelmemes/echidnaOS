@@ -402,8 +402,8 @@ int resize_heap(uint32_t heap_size) {
     task_table[current_task]->heap_size = heap_size;
 
     /* reload segments */
-    set_segment(gdt, 0x3, task_table[current_task]->base, task_table[current_task]->pages);
-    set_segment(gdt, 0x4, task_table[current_task]->base, task_table[current_task]->pages);
+    set_segment(gdt, 0x5, task_table[current_task]->base, task_table[current_task]->pages);
+    set_segment(gdt, 0x6, task_table[current_task]->base, task_table[current_task]->pages);
 
     load_ldt((uint32_t)task_table[current_task]->ldt,
              task_table[current_task]->ldt_entries);

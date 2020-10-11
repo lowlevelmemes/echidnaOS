@@ -104,9 +104,10 @@
 #define ENABLE_INTERRUPTS       asm volatile ("sti")
 #define ENTER_IDLE              \
     asm volatile (              \
+                    "call escalate_privilege;" \
+                    "mov esp, 0xeffff0;" \
                     "sti;"      \
                     "1:"        \
-                    "mov esp, 0xeffff0;"    \
                     "hlt;"      \
                     "jmp 1b;"   \
                  )
@@ -200,8 +201,15 @@ typedef struct {
     int internal_handle;
 } file_handle_v2_t;
 
-typedef struct {
+struct iret_frame {
+    uint32_t eip;
+    uint32_t cs;
+    uint32_t eflags;
+    uint32_t esp;
+    uint32_t ss;
+};
 
+struct gpr_state {
     uint32_t eax;
     uint32_t ebx;
     uint32_t ecx;
@@ -209,17 +217,13 @@ typedef struct {
     uint32_t esi;
     uint32_t edi;
     uint32_t ebp;
-    uint32_t esp;
-    uint32_t eip;
-    uint32_t cs;
     uint32_t ds;
     uint32_t es;
     uint32_t fs;
     uint32_t gs;
-    uint32_t ss;
-    uint32_t eflags;
 
-} cpu_t;
+    struct iret_frame;
+};
 
 typedef struct {
     int status;
@@ -228,7 +232,7 @@ typedef struct {
     uint32_t base;
     uint32_t pages;
 
-    cpu_t cpu;
+    struct gpr_state cpu;
 
     char pwd[2048];
     char name[128];
@@ -462,8 +466,10 @@ void set_pit_freq(uint32_t frequency);
 void load_gdt(void);
 void set_segment(struct dt_entry *dt, uint16_t entry, uint32_t base, uint32_t page_count);
 void load_ldt(uint32_t base, uint32_t page_count);
+void load_idt(void);
 
-void load_IDT(void);
+int escalate_privilege(void);
+void deescalate_privlege(void);
 
 void keyboard_init(void);
 void keyboard_handler(uint8_t input_byte);

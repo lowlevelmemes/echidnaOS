@@ -1,8 +1,36 @@
+%macro pusham 0
+    cld
+    push gs
+    push fs
+    push es
+    push ds
+    push ebp
+    push edi
+    push esi
+    push edx
+    push ecx
+    push ebx
+    push eax
+%endmacro
+
+%macro popam 0
+    pop eax
+    pop ebx
+    pop ecx
+    pop edx
+    pop esi
+    pop edi
+    pop ebp
+    pop ds
+    pop es
+    pop fs
+    pop gs
+%endmacro
+
 global handler_simple
 global handler_code
 global handler_irq_pic0
 global handler_irq_pic1
-global handler_div0
 global irq0_handler
 global keyboard_isr
 global syscall
@@ -11,9 +39,13 @@ global ts_enable
 global read_stat
 global write_stat
 
+global exception_thunks
+global escalate_priv_isr
+
 extern keyboard_handler
 extern task_switch
-extern except_div0
+
+extern exception_handler
 
 extern set_PIC0_mask
 extern get_PIC0_mask
@@ -62,6 +94,8 @@ extern get_heap_size
 extern resize_heap
 extern syscall_log
 extern syscall_new_segment
+
+extern escalate_privilege
 
 section .data
 
@@ -126,46 +160,62 @@ routine_list:
         dd      vfs_mkdir               ; 0x35
         dd      vfs_create              ; 0x36
 
+
+%macro raise_exception_getaddr 1
+dd raise_exception_%1
+%endmacro
+
+global exception_thunks
+exception_thunks:
+%assign i 0
+%rep 32
+raise_exception_getaddr i
+%assign i i+1
+%endrep
+
 section .text
 
 bits 32
 
-handler_simple:
-        jmp $
-        iretd
+%macro raise_exception 1
+align 16
+raise_exception_%1:
+    push dword [esp+5*4]
+    push dword [esp+5*4]
+    push dword [esp+5*4]
+    push dword [esp+5*4]
+    push dword [esp+5*4]
+    pusham
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov eax, esp
+    push dword [esp+20*4]
+    push eax
+    push %1
+    call exception_handler
+    popam
+    iretd
+%endmacro
 
-handler_code:
-        jmp $
-        add esp, 4
-        iretd
+%assign i 0
+%rep 32
+raise_exception i
+%assign i i+1
+%endrep
 
-handler_irq_pic0:
-        push eax
-        mov al, 0x20    ; acknowledge interrupt to PIC0
-        out 0x20, al
-        pop eax
-        iretd
-
-handler_irq_pic1:
-        push eax
-        mov al, 0x20    ; acknowledge interrupt to both PICs
-        out 0xA0, al
-        out 0x20, al
-        pop eax
-        iretd
-
-handler_div0:
-        mov ax, 0x10
-        mov ds, ax
-        mov es, ax
-        call except_div0
+escalate_priv_isr:
+    mov eax, dword [esp]
+    cmp dword [esp+4], 0x08
+    je .intra_ring
+    mov esp, dword [esp+12]
+  .intra_ring:
+    jmp eax
 
 irq0_handler:
-        push ds
-        push 0x10
-        pop ds
-        cmp dword [ts_enable], 0
-        pop ds
+        cmp dword [ss:ts_enable], 0
         je .ts_abort
         ; save task status
         push gs
@@ -186,6 +236,7 @@ irq0_handler:
         mov es, ax
         mov fs, ax
         mov gs, ax
+        push esp
         call task_switch
     .ts_abort:
         push eax
@@ -204,7 +255,7 @@ keyboard_isr:
         push ebp
         push ds
         push es
-        mov ax, 0x10
+        mov ax, 0x21
         mov ds, ax
         mov es, ax
         xor eax, eax
@@ -244,11 +295,7 @@ syscall:
         cmp eax, 0x05
         je fork_isr
         ; disable task switch, reenable all interrupts
-        push ds
-        push 0x10
-        pop ds
-        mov dword [ts_enable], 0
-        pop ds
+        mov dword [ss:ts_enable], 0
         sti
         ; special routines check
         cmp eax, 0x30
@@ -271,7 +318,7 @@ syscall:
         push es
         push fs
         push gs
-        mov bx, 0x10
+        mov bx, 0x21
         mov ds, bx
         mov es, bx
         mov fs, bx
@@ -313,7 +360,7 @@ vfs_read_isr:
         push es
         push fs
         push gs
-        mov bx, 0x10
+        mov bx, 0x21
         mov ds, bx
         mov es, bx
         mov fs, bx
@@ -352,7 +399,7 @@ vfs_read_isr:
         push ecx
         push ebx
         push eax
-        mov ax, 0x10
+        mov ax, 0x21
         mov ds, ax
         mov es, ax
         mov fs, ax
@@ -364,6 +411,8 @@ vfs_read_isr:
         push ecx
         call enter_iowait_status
         add esp, 20
+        call escalate_privilege
+        push esp
         call task_switch
 
 vfs_write_isr:
@@ -377,7 +426,7 @@ vfs_write_isr:
         push es
         push fs
         push gs
-        mov bx, 0x10
+        mov bx, 0x21
         mov ds, bx
         mov es, bx
         mov fs, bx
@@ -416,7 +465,7 @@ vfs_write_isr:
         push ecx
         push ebx
         push eax
-        mov ax, 0x10
+        mov ax, 0x21
         mov ds, ax
         mov es, ax
         mov fs, ax
@@ -428,6 +477,8 @@ vfs_write_isr:
         push ecx
         call enter_iowait_status
         add esp, 20
+        call escalate_privilege
+        push esp
         call task_switch
 
 read_isr:
@@ -442,7 +493,7 @@ read_isr:
         push es
         push fs
         push gs
-        mov bx, 0x10
+        mov bx, 0x21
         mov ds, bx
         mov es, bx
         mov fs, bx
@@ -482,7 +533,7 @@ read_isr:
         push ecx
         push ebx
         push eax
-        mov bx, 0x10
+        mov bx, 0x21
         mov ds, bx
         mov es, bx
         mov fs, bx
@@ -494,6 +545,8 @@ read_isr:
         push ecx
         call enter_iowait_status1
         add esp, 20
+        call escalate_privilege
+        push esp
         call task_switch
 
 write_isr:
@@ -508,7 +561,7 @@ write_isr:
         push es
         push fs
         push gs
-        mov bx, 0x10
+        mov bx, 0x21
         mov ds, bx
         mov es, bx
         mov fs, bx
@@ -548,7 +601,7 @@ write_isr:
         push ecx
         push ebx
         push eax
-        mov bx, 0x10
+        mov bx, 0x21
         mov ds, bx
         mov es, bx
         mov fs, bx
@@ -560,6 +613,8 @@ write_isr:
         push ecx
         call enter_iowait_status1
         add esp, 20
+        call escalate_privilege
+        push esp
         call task_switch
 
 gen_exec_block_isr:
@@ -575,7 +630,7 @@ gen_exec_block_isr:
         push ecx
         push ebx
         push eax
-        mov ax, 0x10
+        mov ax, 0x21
         mov ds, ax
         mov es, ax
         mov fs, ax
@@ -592,6 +647,8 @@ gen_exec_block_isr:
         ; done
         cmp eax, -1
         je .abort
+        call escalate_privilege
+        push esp
         call task_switch
     .abort:
         pop eax
@@ -622,12 +679,14 @@ ipc_await:
         push ecx
         push ebx
         push eax
-        mov ax, 0x10
+        mov ax, 0x21
         mov ds, ax
         mov es, ax
         mov fs, ax
         mov gs, ax
         call enter_ipcwait_status
+        call escalate_privilege
+        push esp
         call task_switch
 
 vdev_await:
@@ -643,12 +702,14 @@ vdev_await:
         push ecx
         push ebx
         push eax
-        mov ax, 0x10
+        mov ax, 0x21
         mov ds, ax
         mov es, ax
         mov fs, ax
         mov gs, ax
         call enter_vdevwait_status
+        call escalate_privilege
+        push esp
         call task_switch
 
 fork_isr:
@@ -664,9 +725,6 @@ fork_isr:
         push ecx
         push ebx
         push eax
-        mov ax, 0x10
-        mov ds, ax
-        mov es, ax
-        mov fs, ax
-        mov gs, ax
+        call escalate_privilege
+        push esp
         call task_fork
