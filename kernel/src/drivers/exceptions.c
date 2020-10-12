@@ -55,6 +55,9 @@ void exception_handler(int exception_number, struct gpr_state *state, int has_er
             asm volatile ("hlt");
     }
 
+    tty_kputs("\nLast syscall: ", 0);
+    tty_kxtoa(last_syscall, 0);
+
     tty_kputs("\nTask terminated.\n", 0);
     task_quit(current_task, -1);
 }

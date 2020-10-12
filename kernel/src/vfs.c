@@ -38,12 +38,12 @@ int vfs_translate_fs(int mountpoint) {
 void vfs_get_absolute_path(char* path_ptr, char* path) {
     // converts a relative path into an absolute one
     char* orig_ptr = path_ptr;
-    
+
     if (!*path) {
         kstrcpy(path_ptr, task_table[current_task]->pwd);
         return;
     }
-    
+
     if (*path != '/') {
         kstrcpy(path_ptr, task_table[current_task]->pwd);
         path_ptr += kstrlen(path_ptr);
@@ -52,9 +52,9 @@ void vfs_get_absolute_path(char* path_ptr, char* path) {
         path_ptr++;
         path++;
     }
-    
+
     goto first_run;
-    
+
     for (;;) {
         switch (*path) {
             case '/':
@@ -104,9 +104,9 @@ term:
 int vfs_cd(char* path) {
     path += task_table[current_task]->base;
     char absolute_path[2048];
-    
+
     vfs_metadata_t metadata;
-    
+
     vfs_get_absolute_path(absolute_path, path);
 
     if (vfs_kget_metadata(absolute_path, &metadata, DIRECTORY_TYPE) == FAILURE)
@@ -125,7 +125,7 @@ int vfs_read(char* path, uint64_t loc) {
 int vfs_kread(char* path, uint64_t loc) {
     char* local_path;
     char absolute_path[2048];
-    
+
     if (!kstrncmp(path, ":://", 4)) {
     // read from dev directly
         path += 4;
@@ -135,7 +135,7 @@ int vfs_kread(char* path, uint64_t loc) {
         }
         return FAILURE;
     }
-    
+
     vfs_get_absolute_path(absolute_path, path);
 
     int mountpoint = vfs_translate_mnt(absolute_path, &local_path);
@@ -226,7 +226,7 @@ int vfs_write(char* path, uint64_t loc, uint8_t val) {
 int vfs_kwrite(char* path, uint64_t loc, uint8_t val) {
     char* local_path;
     char absolute_path[2048];
-    
+
     if (!kstrncmp(path, ":://", 4)) {
     // write to dev directly
         path += 4;
@@ -236,7 +236,7 @@ int vfs_kwrite(char* path, uint64_t loc, uint8_t val) {
         }
         return FAILURE;
     }
-    
+
     vfs_get_absolute_path(absolute_path, path);
 
     int mountpoint = vfs_translate_mnt(absolute_path, &local_path);
@@ -384,9 +384,9 @@ int vfs_list(char* path, vfs_metadata_t* metadata, uint32_t entry) {
     char* local_path;
     char absolute_path[2048];
     path += task_table[current_task]->base;
-    
+
     metadata = (vfs_metadata_t*)((uint32_t)metadata + task_table[current_task]->base);
-    
+
     vfs_get_absolute_path(absolute_path, path);
 
     int mountpoint = vfs_translate_mnt(absolute_path, &local_path);
@@ -407,7 +407,7 @@ int vfs_get_metadata(char* path, vfs_metadata_t* metadata, int type) {
 int vfs_kget_metadata(char* path, vfs_metadata_t* metadata, int type) {
     char* local_path;
     char absolute_path[2048];
-    
+
     vfs_get_absolute_path(absolute_path, path);
 
     int mountpoint = vfs_translate_mnt(absolute_path, &local_path);
@@ -423,15 +423,15 @@ int vfs_mount(char* mountpoint, char* device, char* filesystem) {
     int i;
     for (i = 0; i < filesystems_ptr; i++)
         if (!kstrcmp(filesystems[i].name, filesystem)) break;
-    
+
     if (((*filesystems[i].mount)(device)) == FAILURE) return FAILURE;
-    
+
     mountpoints = krealloc(mountpoints, sizeof(mountpoint_t) * (mountpoints_ptr+1));
-    
+
     kstrcpy(mountpoints[mountpoints_ptr].mountpoint, mountpoint + task_table[current_task]->base);
     kstrcpy(mountpoints[mountpoints_ptr].device, device + task_table[current_task]->base);
     kstrcpy(mountpoints[mountpoints_ptr].filesystem, filesystem + task_table[current_task]->base);
-    
+
     kputs("\nMounted `"); kputs(mountpoints[mountpoints_ptr].device);
     kputs("' on `"); kputs(mountpoints[mountpoints_ptr].mountpoint);
     kputs("' using filesystem: "); kputs(mountpoints[mountpoints_ptr].filesystem);
@@ -447,15 +447,15 @@ int vfs_close(int handle) {
 
     if (handle < 0)
         return -1;
-        
+
     if (handle >= task_table[current_task]->file_handles_v2_ptr)
         return -1;
-    
+
     if (task_table[current_task]->file_handles_v2[handle].free)
         return -1;
-    
+
     task_table[current_task]->file_handles_v2[handle].free = 1;
-    
+
     return 0;
 }
 
@@ -467,15 +467,15 @@ int vfs_kclose(int handle) {
 
     if (handle < 0)
         return -1;
-        
+
     if (handle >= task_table[0]->file_handles_v2_ptr)
         return -1;
-    
+
     if (task_table[0]->file_handles_v2[handle].free)
         return -1;
-    
+
     task_table[0]->file_handles_v2[handle].free = 1;
-    
+
     return 0;
 }
 
@@ -494,9 +494,9 @@ void vfs_install_fs(char* name,
                     int (*uread)(int handle, char* ptr, int len),
                     int (*uwrite)(int handle, char* ptr, int len),
                     int (*seek)(int handle, int offset, int type) ) {
-    
+
     filesystems = krealloc(filesystems, sizeof(filesystem_t) * (filesystems_ptr+1));
-    
+
     kstrcpy(filesystems[filesystems_ptr].name, name);
     filesystems[filesystems_ptr].read = read;
     filesystems[filesystems_ptr].write = write;
@@ -512,7 +512,7 @@ void vfs_install_fs(char* name,
     filesystems[filesystems_ptr].uread = uread;
     filesystems[filesystems_ptr].uwrite = uwrite;
     filesystems[filesystems_ptr].seek = seek;
-    
+
     filesystems_ptr++;
     return;
 }

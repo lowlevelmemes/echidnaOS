@@ -242,10 +242,7 @@ raise_exception_err i
 
 escalate_priv_isr:
     mov eax, dword [esp]
-    cmp dword [esp+4], 0x08
-    je .intra_ring
     mov esp, dword [esp+12]
-  .intra_ring:
     jmp eax
 
 irq0_handler:
@@ -318,9 +315,13 @@ keyboard_isr:
         pop eax
         iretd
 
+global last_syscall
+last_syscall dd -1
+
 syscall:
 ; ARGS in EAX (call code), ECX, EDX, EDI, ESI
 ; return value in EAX/EDX
+        mov dword [ss:last_syscall], eax
         ; special routines check
         cmp eax, 0x0d
         je ipc_await

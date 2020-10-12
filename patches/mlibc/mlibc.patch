@@ -215,6 +215,24 @@ index 0000000..0a4789f
 +} // namespace mlibc
 +
 +#endif // MLIBC_ARCH_DEFS_HPP
+diff --git a/mlibc-orig/options/posix/generic/unistd-stubs.cpp b/mlibc-workdir/options/posix/generic/unistd-stubs.cpp
+index 7961903..e2a3769 100644
+--- a/mlibc-orig/options/posix/generic/unistd-stubs.cpp
++++ b/mlibc-workdir/options/posix/generic/unistd-stubs.cpp
+@@ -222,7 +222,12 @@ int ftruncate(int fd, off_t size) {
+ 	return 0;
+ }
+ char *getcwd(char *buffer, size_t size) {
+-	__ensure(buffer && "glibc extension for !buffer is not implemented");
++    if (buffer == NULL) {
++        if (!size)
++            size = 256;
++
++        buffer = (char*)calloc(size, 1);
++    }
+ 	if(!mlibc::sys_getcwd) {
+ 		MLIBC_MISSING_SYSDEP();
+ 		errno = ENOSYS;
 diff --git a/mlibc-orig/options/rtdl/generic/main.cpp b/mlibc-workdir/options/rtdl/generic/main.cpp
 index c18beeb..bd3fe2c 100644
 --- a/mlibc-orig/options/rtdl/generic/main.cpp
@@ -299,10 +317,10 @@ index 0000000..282953f
 +
 diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
-index 0000000..d4d52c3
+index 0000000..f704bd2
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
-@@ -0,0 +1,220 @@
+@@ -0,0 +1,223 @@
 +
 +#include <bits/ensure.h>
 +#include <mlibc/debug.hpp>
@@ -398,6 +416,9 @@ index 0000000..d4d52c3
 +                : "a"(0x2a), "c"(path), "d"(flags), "D"(0)
 +                : "memory"
 +        );
++
++        if (ret == -1)
++            return ENOENT;
 +
 +        *fd = ret;
 +

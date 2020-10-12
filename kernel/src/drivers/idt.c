@@ -11,9 +11,8 @@ struct idt_entry {
 } __attribute__((packed));
 
 struct idt_ptr {
-    uint16_t size;
-    /* Start address */
-    uint32_t address;
+    uint16_t limit;
+    uint32_t base;
 } __attribute__((packed));
 
 static struct idt_entry idt[256] = {0};
@@ -36,13 +35,14 @@ int escalate_privilege(void) {
     if (!(ret & 0x03))
         return 0;
 
-    asm volatile ("int 0x90":::"eax", "memory");
     asm volatile (
-        "mov ds, %0;"
-        "mov es, %0;"
-        "mov fs, %0;"
-        "mov gs, %0;"
-        :: "r"(0x10) : "memory"
+        "int 0x90;"
+        "mov ax, 0x10;"
+        "mov ds, ax;"
+        "mov es, ax;"
+        "mov fs, ax;"
+        "mov gs, ax;"
+        ::: "eax", "memory"
     );
     return 1;
 }
