@@ -4,9 +4,17 @@
 
 echidnaOS is a pointless exercise in futility, using x86 segmentation.
 
-# Building Instructions
+## Ported Software
+- duktape
+- bf
+- hello
+- tinyscheme (WIP)
+- bash (WIP)
+- zork (WIP)
 
-## Requirements
+## Building Instructions
+
+### Requirements
 
 * nasm
 * gnu make
@@ -15,7 +23,7 @@ echidnaOS is a pointless exercise in futility, using x86 segmentation.
 * xbstrap
 * qemu (for testing the image, non essential)
 
-## Step by step:
+### Step by step:
 
 Build the toolchain and everything else
 ```bash
