@@ -9,6 +9,7 @@ echidnaOS is a pointless exercise in futility, using x86 segmentation.
 - bf
 - hello
 - tinyscheme (WIP)
+- forth (WIP)
 - bash (WIP)
 - zork (WIP)
 
