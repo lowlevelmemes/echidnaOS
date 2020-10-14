@@ -28,10 +28,6 @@
 #define TTY_DEF_CUR_PAL 0x70
 #define TTY_DEF_TXT_PAL 0x07
 
-#define INITRAMFS_BASE 0x1000000
-#define INITRAMFS_SIZE 0x800000
-
-#define KRNL_MEMORY_BASE 0x1000000
 #define KRNL_MAX_TASKS 65536
 
 #define DEFAULT_STACK 0x10000
@@ -117,7 +113,7 @@
 #define ENTER_IDLE              \
     asm volatile (              \
                     "call escalate_privilege;" \
-                    "mov esp, 0xeffff0;" \
+                    "mov esp, OFFSET ring0_stack.top;" \
                     "sti;"      \
                     "1:"        \
                     "hlt;"      \
@@ -437,7 +433,7 @@ void panic(const char *msg);
 
 void task_init(void);
 
-void init_kalloc(void);
+void init_kalloc(struct stivale_struct *stivale_struct);
 void* kalloc(uint32_t size);
 void* krealloc(void* addr, uint32_t new_size);
 void kfree(void* addr);
@@ -483,7 +479,7 @@ void load_ldt(uint32_t base, uint32_t page_count);
 void load_idt(void);
 
 int escalate_privilege(void);
-void deescalate_privlege(void);
+void deescalate_privilege(void);
 
 void keyboard_init(void);
 void keyboard_handler(uint8_t input_byte);

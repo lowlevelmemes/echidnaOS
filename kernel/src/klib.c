@@ -80,12 +80,17 @@ uint32_t kstrlen(char* str) {
     return len;
 }
 
-void init_kalloc(void) {
+static size_t kalloc_base;
+
+void init_kalloc(struct stivale_struct *stivale_struct) {
+    struct stivale_module *module = (void*)(uintptr_t)stivale_struct->modules;
+    kalloc_base = (size_t)module->end;
+
     // creates the first memory chunk
-    heap_chunk_t* root_chunk = (heap_chunk_t*)KRNL_MEMORY_BASE;
+    heap_chunk_t* root_chunk = (heap_chunk_t*)kalloc_base;
 
     root_chunk->free = 1;
-    root_chunk->size = memory_size - KRNL_MEMORY_BASE - sizeof(heap_chunk_t);
+    root_chunk->size = memory_size - kalloc_base - sizeof(heap_chunk_t);
     root_chunk->prev_chunk = 0;
 
     return;
@@ -93,7 +98,7 @@ void init_kalloc(void) {
 
 void* kalloc(uint32_t size) {
     // search for a big enough, free heap chunk
-    heap_chunk_t* heap_chunk = (heap_chunk_t*)KRNL_MEMORY_BASE;
+    heap_chunk_t* heap_chunk = (heap_chunk_t*)kalloc_base;
     uint32_t heap_chunk_ptr;
     char* area;
 

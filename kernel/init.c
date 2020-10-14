@@ -33,7 +33,7 @@ void kernel_init(struct stivale_struct *stivale_struct) {
 
     // detect memory
     memory_size = detect_mem();
-    init_kalloc();
+    init_kalloc(stivale_struct);
 
     // increase speed of the PIT
     set_pit_freq(KRNL_PIT_FREQ);
