@@ -26,7 +26,7 @@ sources:
         workdir: '@THIS_SOURCE_DIR@'
       - args: ['autoconf']
         workdir: '@THIS_SOURCE_DIR@/libstdc++-v3'
-      - args: ['sh', '-c', 'pwd && patch -p1 < ../../extra-patches/gcc.patch']
+      - args: ['sh', '-c', 'patch -p1 < ../../extra-patches/gcc.patch']
         workdir: '@THIS_SOURCE_DIR@'
 
   - name: mlibc
@@ -99,6 +99,7 @@ tools:
         - '--disable-multilib'
         - '--disable-gcov'
         - '--disable-shared'
+        - '--disable-default-pie'
         - '--enable-languages=c,c++'
         - '--enable-initfini-array'
         - 'CFLAGS=-O2 -pipe'
@@ -327,8 +328,11 @@ packages:
         - '--disable-nls'
         - '--disable-gcov'
         - '--disable-shared'
+        - '--disable-host-shared'
+        - '--disable-default-pie'
         - 'CFLAGS=-O2 -pipe'
         - 'CXXFLAGS=-O2 -pipe'
+        - 'LDFLAGS=-static -z muldefs'
     build:
       - args: ['make', '-j@PARALLELISM@', 'all-gcc', 'all-target-libgcc', 'all-target-libstdc++-v3']
       - args: ['make', 'install-gcc', 'install-target-libgcc', 'install-target-libstdc++-v3']

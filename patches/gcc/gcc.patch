@@ -33,7 +33,7 @@ diff '--color=auto' -urN gcc-10.2.0/fixincludes/mkfixinc.sh gcc-10.2.0-patched/f
 diff '--color=auto' -urN gcc-10.2.0/gcc/config/echidnaos.h gcc-10.2.0-patched/gcc/config/echidnaos.h
 --- gcc-10.2.0/gcc/config/echidnaos.h	1970-01-01 01:00:00.000000000 +0100
 +++ gcc-10.2.0-patched/gcc/config/echidnaos.h	2020-10-06 02:18:35.191554303 +0200
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,32 @@
 +#undef TARGET_ECHIDNAOS
 +#define TARGET_ECHIDNAOS 1
 +
@@ -55,20 +55,29 @@ diff '--color=auto' -urN gcc-10.2.0/gcc/config/echidnaos.h gcc-10.2.0-patched/gc
 +    builtin_assert ("system=unix");      \
 +    builtin_assert ("system=posix");     \
 +  } while (0);
++
++/* Ignore (with warning) -fPIC */
++#undef SUBTARGET_OVERRIDE_OPTIONS
++#define SUBTARGET_OVERRIDE_OPTIONS                                         \
++    do {                                                                   \
++        if (flag_pic) {                                                    \
++            fnotice(stderr, "-f%s ignored (not supported by echidnaOS)\n", \
++                (flag_pic > 1) ? "PIC" : "pic");                           \
++            flag_pic = 0;                                                  \
++        }                                                                  \
++    } while (0);
 diff '--color=auto' -urN gcc-10.2.0/gcc/config.gcc gcc-10.2.0-patched/gcc/config.gcc
 --- gcc-10.2.0/gcc/config.gcc	2020-07-23 08:35:17.316384243 +0200
 +++ gcc-10.2.0-patched/gcc/config.gcc	2020-10-06 01:55:05.297311213 +0200
-@@ -773,6 +773,14 @@
+@@ -773,6 +773,12 @@
    esac
    use_gcc_stdint=wrap
    ;;
 +*-*-echidnaos*)
-+  extra_options="$extra_options gnu-user.opt"
 +  gas=yes
 +  gnu_ld=yes
 +  default_use_cxa_atexit=yes
 +  use_gcc_stdint=wrap
-+  thread_file='posix'
 +  ;;
  *-*-fuchsia*)
    native_system_header_dir=/include
@@ -78,7 +87,7 @@ diff '--color=auto' -urN gcc-10.2.0/gcc/config.gcc gcc-10.2.0-patched/gcc/config
  	esac
  	;;
 +i[3-7]86-*-echidnaos*)
-+	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h gnu-user.h glibc-stdint.h i386/gnu-user-common.h echidnaos.h"
++	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h echidnaos.h"
 +	;;
  x86_64-*-fuchsia*)
  	tmake_file="${tmake_file} i386/t-x86_64-elf"

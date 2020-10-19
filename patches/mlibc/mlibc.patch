@@ -317,10 +317,10 @@ index 0000000..c233646
 +	# TODO: implement this lol
 diff --git a/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S b/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S
 new file mode 100644
-index 0000000..3aad212
+index 0000000..2125ea1
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,16 @@
 +.section .echidnaos_entry
 +.global _start
 +_start:
@@ -332,6 +332,11 @@ index 0000000..3aad212
 +___tls_get_addr:
 +    mov $0x12348765, %eax
 +    jmp ___tls_get_addr
++
++.section .data
++.global _GLOBAL_OFFSET_TABLE_
++_GLOBAL_OFFSET_TABLE_:
++    .long 0xdeadbeef
 diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/entry.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/entry.cpp
 new file mode 100644
 index 0000000..282953f

@@ -201,7 +201,7 @@ raise_exception_err_%1:
     mov fs, ax
     mov gs, ax
     mov eax, esp
-    push dword [esp+20*4]
+    push dword [esp+16*4]
     push 1
     push eax
     push %1
