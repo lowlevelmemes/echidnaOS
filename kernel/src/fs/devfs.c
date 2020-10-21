@@ -180,7 +180,7 @@ int devfs_open(char* path, int flags, int mode, char* dev) {
         new_handle.ptr = 0;
         new_handle.begin = 0;
         if (*path == '/') path++;
-        int device;
+        uint32_t device;
         for (device = 0; device < device_ptr; device++)
             if (!kstrcmp(path, device_list[device].name)) break;
         new_handle.device = device;

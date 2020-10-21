@@ -166,7 +166,7 @@ static int partitioned_medium_io_wrapper(
 
     if (part->cache_state == CACHE_NOTREADY || sect != part->in_cache) {
         if (part->cache_state == CACHE_DIRTY) {
-            devfs_seek(part->fd, (part->first_sect + sect) * 512, SEEK_SET);
+            devfs_seek(part->fd, (part->first_sect + part->in_cache) * 512, SEEK_SET);
             devfs_uwrite(part->fd, part->cache, 512);
         }
         devfs_seek(part->fd, (part->first_sect + sect) * 512, SEEK_SET);

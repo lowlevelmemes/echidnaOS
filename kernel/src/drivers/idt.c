@@ -89,7 +89,7 @@ void load_idt(void) {
 
     struct idt_ptr idt_ptr = {
         sizeof(idt) - 1,
-        (uint64_t)idt
+        (uint32_t)idt
     };
 
     asm volatile (

@@ -51,7 +51,6 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     init_streams();
     init_tty_drv();
     init_bios_harddisks();
-    init_ata();
     init_com();
     init_stty();
     init_pcspk();

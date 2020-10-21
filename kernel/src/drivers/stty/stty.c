@@ -8,7 +8,7 @@
 
 #define MAX_STTY 1
 
-static char* stty_names[] = { "ttycom0", "ttycom1", "ttycom2", "ttycom3" };
+static char* stty_names[] = { "stty0", "stty1", "stty2", "stty3" };
 
 static char* com_devices[] = { ":://com0", ":://com1", ":://com2", ":://com3" };
 
@@ -66,7 +66,7 @@ int stty_io_wrapper(uint32_t dev, uint64_t loc, int type, uint8_t payload) {
 void init_stty(void) {
 
     kputs("\nInitialising serial ttys...");
-    
+
     for (int i = 0; i < MAX_STTY; i++) {
         kstrcpy(devices[i], com_devices[i]);
         kernel_add_device(stty_names[i], i, 0, &stty_io_wrapper);
