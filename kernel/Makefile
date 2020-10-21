@@ -9,7 +9,7 @@ OBJ = $(C_FILES:.c=.o) $(ASM_FILES:.asm=.o)
 BINS = $(REAL_FILES:.real=.bin)
 
 CHARDFLAGS = \
-    -std=gnu99 \
+    -std=gnu11 \
     -fplan9-extensions \
     -masm=intel \
     -ffreestanding \
@@ -17,7 +17,7 @@ CHARDFLAGS = \
     -mno-80387 \
     -mno-mmx \
     -I./include
-CFLAGS = -O2 -Wall -Wextra -pipe
+CFLAGS = -flto -O3 -Wall -Wextra -pipe
 
 LDHARDFLAGS = \
     -lgcc \
@@ -26,7 +26,7 @@ LDHARDFLAGS = \
     -no-pie \
     -static \
     -Tlinker.ld
-LDFLAGS = -O2
+LDFLAGS = -flto -O3
 
 echidna.elf: $(BINS) $(OBJ) $(H_FILES)
 	$(CC) $(OBJ) $(LDFLAGS) $(LDHARDFLAGS) -o $@
