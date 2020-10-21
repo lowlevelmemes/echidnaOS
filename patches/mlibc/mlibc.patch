@@ -315,6 +315,26 @@ index 0000000..c233646
 +.global pltRelocateStub
 +pltRelocateStub:
 +	# TODO: implement this lol
+diff --git a/mlibc-orig/subprojects/cxxshim.wrap b/mlibc-workdir/subprojects/cxxshim.wrap
+index a024847..3c491ef 100644
+--- a/mlibc-orig/subprojects/cxxshim.wrap
++++ b/mlibc-workdir/subprojects/cxxshim.wrap
+@@ -1,4 +1,4 @@
+ [wrap-git]
+ directory = cxxshim
+ url = https://github.com/managarm/cxxshim.git
+-revision = master
++revision = 6c2af28999417b9eebe18dcbb8725db89d5410c0
+diff --git a/mlibc-orig/subprojects/frigg.wrap b/mlibc-workdir/subprojects/frigg.wrap
+index 89c7ccb..44bf558 100644
+--- a/mlibc-orig/subprojects/frigg.wrap
++++ b/mlibc-workdir/subprojects/frigg.wrap
+@@ -1,4 +1,4 @@
+ [wrap-git]
+ directory = frigg
+ url = https://github.com/managarm/frigg.git
+-revision = master
++revision = d2e6de1b1b3d99a4f2672ffcf963e57fc4c17a23
 diff --git a/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S b/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S
 new file mode 100644
 index 0000000..9959f64
