@@ -80,12 +80,9 @@ uint32_t kstrlen(char* str) {
     return len;
 }
 
-static size_t kalloc_base;
+static size_t kalloc_base = 0x1000000;
 
-void init_kalloc(struct stivale_struct *stivale_struct) {
-    struct stivale_module *module = (void*)(uintptr_t)stivale_struct->modules;
-    kalloc_base = (size_t)module->end;
-
+void init_kalloc(void) {
     // creates the first memory chunk
     heap_chunk_t* root_chunk = (heap_chunk_t*)kalloc_base;
 

@@ -33,7 +33,7 @@ void kernel_init(struct stivale_struct *stivale_struct) {
 
     // detect memory
     memory_size = detect_mem();
-    init_kalloc(stivale_struct);
+    init_kalloc();
 
     // increase speed of the PIT
     set_pit_freq(KRNL_PIT_FREQ);
@@ -49,7 +49,6 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     // ******* DRIVER INITIALISATION CALLS GO HERE *******
     init_e9();
     init_streams();
-    init_initramfs(stivale_struct);
     init_tty_drv();
     init_bios_harddisks();
     init_ata();
@@ -97,17 +96,20 @@ void kernel_init(struct stivale_struct *stivale_struct) {
         0
     };
 
-    if (vfs_mount("/", ":://initrd", "echfs") == -2)
+    if (vfs_mount("/", ":://bd0p0", "echfs") == -2)
         for(;;);
     vfs_mount("/dev", "devfs", "devfs");
 
     // launch the shell
     kputs("\nKERNEL INIT DONE!\n");
-    kstrcpy(tty_path, "/dev/tty0");
-    general_execute(&shell_exec);
+
+    switch_tty(1);
+
     kstrcpy(tty_path, "/dev/tty1");
     general_execute(&shell_exec);
     kstrcpy(tty_path, "/dev/tty2");
+    general_execute(&shell_exec);
+    kstrcpy(tty_path, "/dev/tty3");
     general_execute(&shell_exec);
 
     // wait for task scheduler

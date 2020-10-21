@@ -24,21 +24,18 @@ clean:
 	$(MAKE) clean -C kernel
 
 echidna.img: limine/limine-install kernel/echidna.elf shell/sh
-	rm -f initramfs.img echidna.img
-	dd bs=$(IMGSIZE) count=0 seek=32768 if=/dev/zero of=initramfs.img
-	echfs-utils initramfs.img format $(IMGSIZE)
-	echfs-utils initramfs.img mkdir dev
-	echfs-utils initramfs.img mkdir bin
-	echfs-utils initramfs.img mkdir sys
-	echfs-utils initramfs.img mkdir docs
-	echfs-utils initramfs.img import ./shell/sh /sys/init
-	echfs-utils initramfs.img import ./LICENSE.md /docs/license
-	./copy-root-to-img.sh build/system-root/ initramfs.img
+	rm -f echidna.img
 	dd bs=$(IMGSIZE) count=0 seek=65536 if=/dev/zero of=echidna.img
 	parted -s echidna.img mklabel msdos
 	parted -s echidna.img mkpart primary 2048s 100%
 	echfs-utils -m -p0 echidna.img format $(IMGSIZE)
+	echfs-utils -m -p0 echidna.img mkdir dev
+	echfs-utils -m -p0 echidna.img mkdir bin
+	echfs-utils -m -p0 echidna.img mkdir sys
+	echfs-utils -m -p0 echidna.img mkdir docs
+	echfs-utils -m -p0 echidna.img import ./shell/sh /sys/init
+	echfs-utils -m -p0 echidna.img import ./LICENSE.md /docs/license
 	echfs-utils -m -p0 echidna.img import ./kernel/echidna.elf echidna.elf
-	echfs-utils -m -p0 echidna.img import ./initramfs.img initramfs.img
 	echfs-utils -m -p0 echidna.img import ./limine.cfg limine.cfg
+	./copy-root-to-img.sh build/system-root/ echidna.img 0
 	limine/limine-install limine/limine.bin echidna.img

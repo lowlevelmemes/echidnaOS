@@ -9,9 +9,9 @@ typedef struct {
     char path[1024];
     int flags;
     int mode;
-    long ptr;
-    long begin;
-    long end;
+    uint64_t ptr;
+    uint64_t begin;
+    uint64_t end;
     int isblock;
     int device;
 } devfs_handle_t;
@@ -32,10 +32,10 @@ int devfs_create_handle(devfs_handle_t handle) {
 
     devfs_handles = krealloc(devfs_handles, (devfs_handles_ptr + 1) * sizeof(devfs_handle_t));
     handle_n = devfs_handles_ptr++;
-    
+
 load_handle:
     devfs_handles[handle_n] = handle;
-    
+
     return handle_n;
 
 }
@@ -139,7 +139,7 @@ int devfs_get_metadata(char* path, vfs_metadata_t* metadata, int type, char* dev
         }
         else return FAILURE;
     }
-    
+
     if (type == DEVICE_TYPE) {
         if (*path == '/') path++;
         for (uint32_t i = 0; i < device_ptr; i++) {
@@ -152,7 +152,7 @@ int devfs_get_metadata(char* path, vfs_metadata_t* metadata, int type, char* dev
         }
         return FAILURE;
     }
-    
+
     if (type == FILE_TYPE)
         return FAILURE;
 }
@@ -194,33 +194,33 @@ int devfs_close(int handle) {
 
     if (handle < 0)
         return -1;
-        
+
     if (handle >= devfs_handles_ptr)
         return -1;
-    
+
     if (devfs_handles[handle].free)
         return -1;
-    
+
     devfs_handles[handle].free = 1;
-    
+
     return 0;
-    
+
 }
 
 int devfs_seek(int handle, int offset, int type) {
-    
+
     if (handle < 0)
         return -1;
 
     if (handle >= devfs_handles_ptr)
         return -1;
-    
+
     if (devfs_handles[handle].free)
         return -1;
-    
+
     if (devfs_handles[handle].isblock)
         return -1;
-        
+
     switch (type) {
         case SEEK_SET:
             if ((devfs_handles[handle].begin + offset) > devfs_handles[handle].end ||

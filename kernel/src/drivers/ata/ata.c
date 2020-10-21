@@ -23,9 +23,9 @@ typedef struct {
 
 typedef struct {
     uint8_t master; // this is a boolean
-    
+
     uint16_t identify[256];
-    
+
     uint16_t data_port;
     uint16_t error_port;
     uint16_t sector_count_port;
@@ -35,12 +35,12 @@ typedef struct {
     uint16_t device_port;
     uint16_t command_port;
     uint16_t control_port;
-    
+
     uint8_t exists;
-    
+
     uint64_t sector_count;
     uint16_t bytes_per_sector;
-    
+
     cached_sector_t* cache;
 } ata_device;
 
@@ -102,21 +102,21 @@ int cache_sect(uint32_t drive, int sect) {
     // slot not found, overwrite another
     if (overwritten_slot == MAX_CACHED_SECTORS)
         overwritten_slot = 0;
-    
+
     targ = overwritten_slot++;
-    
+
     // flush cache
     if (devices[drive].cache[targ].status == CACHE_DIRTY) {
         if (sect <= 0x0fffffff)
             ret = ata_write28(drive, (uint32_t)devices[drive].cache[targ].sector, devices[drive].cache[targ].cache);
         else
             ret = ata_write48(drive, devices[drive].cache[targ].sector, devices[drive].cache[targ].cache);
-        
+
         if (ret == FAILURE) return FAILURE;
     }
-    
+
     goto notfnd;
-    
+
 fnd:
     // kalloc cache
     devices[drive].cache[targ].cache = kalloc(BYTES_PER_SECT);
@@ -128,9 +128,9 @@ notfnd:
         ret = ata_read28(drive, (uint32_t)sect, devices[drive].cache[targ].cache);
     else
         ret = ata_read48(drive, sect, devices[drive].cache[targ].cache);
-    
+
     if (ret == FAILURE) return FAILURE;
-    
+
     devices[drive].cache[targ].sector = sect;
     devices[drive].cache[targ].status = CACHE_READY;
 
@@ -142,13 +142,13 @@ int ata_read_byte(uint32_t drive, uint64_t loc) {
     uint16_t offset = loc % BYTES_PER_SECT;
     int slot = find_sect(drive, sect);
     int ret;
-    
+
     if (slot == FAILURE)
         slot = cache_sect(drive, sect);
-    
+
     if (slot == FAILURE)
         return FAILURE;
-    
+
     return devices[drive].cache[slot].cache[offset];
 }
 
@@ -157,10 +157,10 @@ int ata_write_byte(uint32_t drive, uint64_t loc, uint8_t payload) {
     uint16_t offset = loc % BYTES_PER_SECT;
     int slot = find_sect(drive, sect);
     int ret;
-    
+
     if (slot == FAILURE)
         slot = cache_sect(drive, sect);
-    
+
     if (slot == FAILURE)
         return FAILURE;
 
@@ -171,7 +171,7 @@ int ata_write_byte(uint32_t drive, uint64_t loc, uint8_t payload) {
 
 void init_ata(void) {
     kputs("\nInitialising ATA device driver...");
-    
+
     int ii = 0;
     int master = 1;
     for (int i = 0; i < DEVICE_COUNT; i++) {
@@ -188,6 +188,8 @@ void init_ata(void) {
         kernel_add_device(ata_names[i], i, devices[i].sector_count * 512,
                           &ata_io_wrapper);
         kputs("\nInitialised "); kputs(ata_names[i]);
+
+        add_partitioned_medium(ata_names[i]);
     }
 
     return;
@@ -195,7 +197,7 @@ void init_ata(void) {
 
 ata_device init_ata_device(uint16_t port_base, uint8_t master) {
     ata_device dev;
-    
+
     dev.data_port = port_base;
     dev.error_port = port_base + 0x01;
     dev.sector_count_port = port_base + 0x02;
@@ -207,13 +209,13 @@ ata_device init_ata_device(uint16_t port_base, uint8_t master) {
     dev.control_port = port_base + 0x206;
     dev.exists = 0;
     dev.master = master;
-    
+
     dev.bytes_per_sector = 512;
-    
+
     dev.cache = kalloc(MAX_CACHED_SECTORS * sizeof(cached_sector_t));
-    
+
     ata_identify(&dev);
-    
+
     return dev;
 }
 
@@ -223,14 +225,14 @@ void ata_identify(ata_device* dev) {
         port_out_b(dev->device_port, 0xa0);
     else
         port_out_b(dev->device_port, 0xb0);
-        
+
     port_out_b(dev->sector_count_port, 0);
     port_out_b(dev->lba_low_port, 0);
     port_out_b(dev->lba_mid_port, 0);
     port_out_b(dev->lba_hi_port, 0);
-    
+
     port_out_b(dev->command_port, 0xEC); // identify command
-    
+
     if (!port_in_b(dev->command_port)) {
         dev->exists = 0;
         kputs("\nNo device found!");
@@ -246,14 +248,14 @@ void ata_identify(ata_device* dev) {
             }
         }
     }
-    
+
     // check for non-standard ATAPI
     if (port_in_b(dev->lba_mid_port) || port_in_b(dev->lba_hi_port)) {
         dev->exists = 0;
         kputs("\nNon-standard ATAPI, ignoring.");
         return;
     }
-    
+
     for (int timeout = 0; timeout < 100000; timeout++) {
         uint8_t status = port_in_b(dev->command_port);
         if (status & 0b00000001) {
@@ -272,14 +274,14 @@ success:
     kputs("\nStoring IDENTIFY info...");
     for (int i = 0; i < 256; i++)
         dev->identify[i] = port_in_w(dev->data_port);
-    
+
     dev->sector_count = *((uint64_t*)&dev->identify[100]);
     kputs("\nSector count: "); kuitoa(dev->sector_count);
-    
+
     kputs("\nDevice successfully identified!");
-    
+
     dev->exists = 1;
-    
+
     return;
 }
 
@@ -289,32 +291,32 @@ int ata_read28(uint32_t disk, uint32_t sector, uint8_t* buffer) {
         port_out_b(devices[disk].device_port, 0xE0 | ((sector & 0x0F000000) >> 24));
     else
         port_out_b(devices[disk].device_port, 0xF0 | ((sector & 0x0F000000) >> 24));
-    
+
     port_out_b(devices[disk].sector_count_port, 1);
     port_out_b(devices[disk].lba_low_port, sector & 0x000000FF);
     port_out_b(devices[disk].lba_mid_port, (sector & 0x0000FF00) >> 8);
     port_out_b(devices[disk].lba_hi_port, (sector & 0x00FF0000) >> 16);
-    
+
     port_out_b(devices[disk].command_port, 0x20); // read command
- 
+
     uint8_t status = port_in_b(devices[disk].command_port);
     while (((status & 0x80) == 0x80)
-        && ((status & 0x01) != 0x01)) 
+        && ((status & 0x01) != 0x01))
         status = port_in_b(devices[disk].command_port);
-    
+
     if (status & 0x01) {
         kputs("\nATA: Error reading sector "); kuitoa(sector); kputs(" on drive "); kuitoa(disk);
         return FAILURE;
     }
-    
+
     for (int i = 0; i < 256; i++) {
         uint16_t wdata = port_in_w(devices[disk].data_port);
-        
+
         int c = i * 2;
         buffer[c] = wdata & 0xFF;
         buffer[c + 1] = (wdata >> 8) & 0xFF;
     }
-    
+
     return SUCCESS;
 }
 
@@ -324,7 +326,7 @@ int ata_read48(uint32_t disk, uint64_t sector, uint8_t* buffer) {
         port_out_b(devices[disk].device_port, 0x40);
     else
         port_out_b(devices[disk].device_port, 0x50);
-    
+
     port_out_b(devices[disk].sector_count_port, 0);   // sector count high byte
     port_out_b(devices[disk].lba_low_port, (uint8_t)((sector & 0x000000FF000000) >> 24));
     port_out_b(devices[disk].lba_mid_port, (uint8_t)((sector & 0x0000FF00000000) >> 32));
@@ -333,27 +335,27 @@ int ata_read48(uint32_t disk, uint64_t sector, uint8_t* buffer) {
     port_out_b(devices[disk].lba_low_port, (uint8_t)(sector & 0x000000000000FF));
     port_out_b(devices[disk].lba_mid_port, (uint8_t)((sector & 0x0000000000FF00) >> 8));
     port_out_b(devices[disk].lba_hi_port, (uint8_t)((sector & 0x00000000FF0000) >> 16));
-    
+
     port_out_b(devices[disk].command_port, 0x24); // read command
- 
+
     uint8_t status = port_in_b(devices[disk].command_port);
     while (((status & 0x80) == 0x80)
-        && ((status & 0x01) != 0x01)) 
+        && ((status & 0x01) != 0x01))
         status = port_in_b(devices[disk].command_port);
-    
+
     if (status & 0x01) {
         kputs("\nATA: Error reading sector "); kuitoa(sector); kputs(" on drive "); kuitoa(disk);
         return FAILURE;
     }
-    
+
     for (int i = 0; i < 256; i++) {
         uint16_t wdata = port_in_w(devices[disk].data_port);
-        
+
         int c = i * 2;
         buffer[c] = wdata & 0xFF;
         buffer[c + 1] = (wdata >> 8) & 0xFF;
     }
-    
+
     return SUCCESS;
 }
 
@@ -363,34 +365,34 @@ int ata_write28(uint32_t disk, uint32_t sector, uint8_t* buffer) {
         port_out_b(devices[disk].device_port, 0xE0 | ((sector & 0x0F000000) >> 24));
     else
         port_out_b(devices[disk].device_port, 0xF0 | ((sector & 0x0F000000) >> 24));
-    
+
     port_out_b(devices[disk].sector_count_port, 1);
     port_out_b(devices[disk].lba_low_port, sector & 0x000000FF);
     port_out_b(devices[disk].lba_mid_port, (sector & 0x0000FF00) >> 8);
     port_out_b(devices[disk].lba_hi_port, (sector & 0x00FF0000) >> 16);
-    
+
     port_out_b(devices[disk].command_port, 0x30); // write command
- 
+
     uint8_t status = port_in_b(devices[disk].command_port);
     while (((status & 0x80) == 0x80)
-        && ((status & 0x01) != 0x01)) 
+        && ((status & 0x01) != 0x01))
         status = port_in_b(devices[disk].command_port);
-    
+
     if (status & 0x01) {
         kputs("\nATA: Error writing sector "); kuitoa(sector); kputs(" on drive "); kuitoa(disk);
         return FAILURE;
     }
-        
+
     for (int i = 0; i < 256; i ++) {
         int c = i * 2;
-        
+
         uint16_t wdata = (buffer[c + 1] << 8) | buffer[c];
-        
+
         port_out_w(devices[disk].data_port, wdata);
     }
-    
+
     ata_flush(disk);
-    
+
     return SUCCESS;
 }
 
@@ -400,7 +402,7 @@ int ata_write48(uint32_t disk, uint64_t sector, uint8_t* buffer) {
         port_out_b(devices[disk].device_port, 0x40);
     else
         port_out_b(devices[disk].device_port, 0x50);
-    
+
     port_out_b(devices[disk].sector_count_port, 0);   // sector count high byte
     port_out_b(devices[disk].lba_low_port, (uint8_t)((sector & 0x000000FF000000) >> 24));
     port_out_b(devices[disk].lba_mid_port, (uint8_t)((sector & 0x0000FF00000000) >> 32));
@@ -409,29 +411,29 @@ int ata_write48(uint32_t disk, uint64_t sector, uint8_t* buffer) {
     port_out_b(devices[disk].lba_low_port, (uint8_t)(sector & 0x000000000000FF));
     port_out_b(devices[disk].lba_mid_port, (uint8_t)((sector & 0x0000000000FF00) >> 8));
     port_out_b(devices[disk].lba_hi_port, (uint8_t)((sector & 0x00000000FF0000) >> 16));
-    
+
     port_out_b(devices[disk].command_port, 0x34); // EXT write command
- 
+
     uint8_t status = port_in_b(devices[disk].command_port);
     while (((status & 0x80) == 0x80)
-        && ((status & 0x01) != 0x01)) 
+        && ((status & 0x01) != 0x01))
         status = port_in_b(devices[disk].command_port);
-    
+
     if (status & 0x01) {
         kputs("\nATA: Error writing sector "); kuitoa(sector); kputs(" on drive "); kuitoa(disk);
         return FAILURE;
     }
-        
+
     for (int i = 0; i < 256; i ++) {
         int c = i * 2;
-        
+
         uint16_t wdata = (buffer[c + 1] << 8) | buffer[c];
-        
+
         port_out_w(devices[disk].data_port, wdata);
     }
-    
+
     ata_flush_ext(disk);
-    
+
     return SUCCESS;
 }
 
@@ -441,20 +443,20 @@ int ata_flush(uint32_t disk) {
         port_out_b(devices[disk].device_port, 0xE0);
     else
         port_out_b(devices[disk].device_port, 0xF0);
-    
+
     port_out_b(devices[disk].command_port, 0xE7); // cache flush command
-    
+
     uint8_t status = port_in_b(devices[disk].command_port);
-    
+
     while (((status & 0x80) == 0x80)
-        && ((status & 0x01) != 0x01)) 
+        && ((status & 0x01) != 0x01))
         status = port_in_b(devices[disk].command_port);
-    
+
     if (status & 0x01) {
         kputs("\nATA: Error occured while flushing cache.");
         return FAILURE;
     }
-    
+
     return SUCCESS;
 
 }
@@ -465,20 +467,20 @@ int ata_flush_ext(uint32_t disk) {
         port_out_b(devices[disk].device_port, 0x40);
     else
         port_out_b(devices[disk].device_port, 0x50);
-    
+
     port_out_b(devices[disk].command_port, 0xEA); // cache flush EXT command
-    
+
     uint8_t status = port_in_b(devices[disk].command_port);
-    
+
     while (((status & 0x80) == 0x80)
-        && ((status & 0x01) != 0x01)) 
+        && ((status & 0x01) != 0x01))
         status = port_in_b(devices[disk].command_port);
-    
+
     if (status & 0x01) {
         kputs("\nATA: Error occured while flushing cache.");
         return FAILURE;
     }
-    
+
     return SUCCESS;
 
 }

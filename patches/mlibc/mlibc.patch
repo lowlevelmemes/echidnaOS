@@ -317,7 +317,7 @@ index 0000000..c233646
 +	# TODO: implement this lol
 diff --git a/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S b/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S
 new file mode 100644
-index 0000000..2125ea1
+index 0000000..9959f64
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/crt-i386/crt0.S
 @@ -0,0 +1,16 @@
@@ -330,8 +330,8 @@ index 0000000..2125ea1
 +.section .text
 +.global ___tls_get_addr
 +___tls_get_addr:
-+    mov $0x12348765, %eax
-+    jmp ___tls_get_addr
++    xor %eax, %eax
++    ret
 +
 +.section .data
 +.global _GLOBAL_OFFSET_TABLE_
@@ -365,10 +365,10 @@ index 0000000..282953f
 +
 diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
-index 0000000..f704bd2
+index 0000000..e2f73d5
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
-@@ -0,0 +1,223 @@
+@@ -0,0 +1,281 @@
 +
 +#include <bits/ensure.h>
 +#include <mlibc/debug.hpp>
@@ -376,6 +376,8 @@ index 0000000..f704bd2
 +#include <errno.h>
 +#include <dirent.h>
 +#include <fcntl.h>
++
++#include <sys_api.h>
 +
 +#define STUB_ONLY { __ensure(!"STUB_ONLY function was called"); __builtin_unreachable(); }
 +
@@ -440,6 +442,11 @@ index 0000000..f704bd2
 +    // TODO: Actually implement this
 +    int sys_futex_wait(int *pointer, int expected) STUB_ONLY
 +    int sys_futex_wake(int *pointer) STUB_ONLY
++
++    int sys_pipe(int *fds, int flags) {
++        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        return ENOSYS;
++    }
 +
 +    // Task functions
 +    void sys_exit(int status) {
@@ -524,6 +531,50 @@ index 0000000..f704bd2
 +        return 0;
 +    }
 +
++    int sys_access(const char *path, int mode) {
++	    int fd;
++	    if(int e = sys_open(path, O_RDWR, &fd); e)
++	    	return e;
++	    sys_close(fd);
++	    return 0;
++    }
++
++
++    int sys_stat(fsfd_target fsfdt, int fd, const char *path, int flags, struct stat *st) {
++        __ensure(fsfdt == fsfd_target::path);
++
++        vfs_metadata_t metadata;
++
++        if (OS_vfs_get_metadata(path, &metadata, VFS_FILE_TYPE) == VFS_FAILURE) {
++            if (OS_vfs_get_metadata(path, &metadata, VFS_DIRECTORY_TYPE) == VFS_FAILURE) {
++                if (OS_vfs_get_metadata(path, &metadata, VFS_DEVICE_TYPE) == VFS_FAILURE) {
++                    return ENOENT;
++                } else {
++                    st->st_mode = S_IFBLK;
++                }
++            } else {
++                st->st_mode = S_IFDIR;
++            }
++        } else {
++            st->st_mode = S_IFREG;
++        }
++
++        st->st_dev = 0;
++        st->st_ino = 0;
++        st->st_nlink = 0;
++        st->st_uid = 0;
++        st->st_gid = 0;
++        st->st_rdev = 0;
++        st->st_size = metadata.size;
++        st->st_atime = 0;
++        st->st_mtime = 0;
++        st->st_ctime = 0;
++        st->st_blksize = 32768;
++        st->st_blocks = metadata.size / 32768 + 1;
++
++        return 0;
++    }
++
 +    int sys_isatty(int fd) {
 +        return 0;
 +    }
@@ -576,9 +627,9 @@ index 0000000..f704bd2
 +    }
 +
 +    int sys_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
-+        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++        *oldact = *act;
 +
-+        return ENOSYS;
++        return 0;
 +    }
 +
 +    int sys_sigprocmask(int how, const sigset_t *__restrict set, sigset_t *__restrict retrieve) {
@@ -586,8 +637,15 @@ index 0000000..f704bd2
 +        return ENOSYS;
 +    }
 +
-+    int sys_access(const char *path, int mode) {
-+        mlibc::infoLogger() << "mlibc: " << __func__ << " is a stub!" << frg::endlog;
++    int sys_fork(pid_t *child) {
++        pid_t ret;
++
++        asm volatile ("int $0x80"
++                : "=a"(ret)
++                : "a"(0x05)
++                : "edx", "memory");
++
++        *child = ret;
 +        return 0;
 +    }
 +} // namespace mlibc

@@ -147,7 +147,6 @@ void init_tty_drv(void);
 void init_streams(void);
 void init_com(void);
 void init_stty(void);
-void init_initramfs(struct stivale_struct *);
 
 // end driver inits
 // fs inits
@@ -433,7 +432,7 @@ void panic(const char *msg);
 
 void task_init(void);
 
-void init_kalloc(struct stivale_struct *stivale_struct);
+void init_kalloc(void);
 void* kalloc(uint32_t size);
 void* krealloc(void* addr, uint32_t new_size);
 void kfree(void* addr);
@@ -484,5 +483,13 @@ void deescalate_privilege(void);
 void keyboard_init(void);
 void keyboard_handler(uint8_t input_byte);
 int keyboard_fetch_char(uint8_t which_tty);
+
+int add_partitioned_medium(const char *medium);
+
+int devfs_open(char* path, int flags, int mode, char* dev);
+int devfs_close(int handle);
+int devfs_seek(int handle, int offset, int type);
+int devfs_uread(int handle, char* ptr, int len);
+int devfs_uwrite(int handle, char* ptr, int len);
 
 #endif

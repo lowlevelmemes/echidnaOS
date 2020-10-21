@@ -48,7 +48,7 @@ int bios_harddisks_io_wrapper(uint32_t disk, uint64_t loc, int type, uint8_t pay
 // arg 1 is the general purpose value for the device (which gets passed to the wrapper when called)
 // arg 2 is a pointer to the standard io wrapper function
 
-void init_bios_harddisks(void) {    
+void init_bios_harddisks(void) {
     kputs("\nInitialising BIOS hard disks...");
 
     drive_parameters_t drive_parameters;
@@ -72,6 +72,8 @@ found:
         kputs("\nSector count:       "); kuitoa(drive_parameters.sect_count);
         kernel_add_device(bios_harddrive_names[i], j, drive_parameters.sect_count * BYTES_PER_SECT, &bios_harddisks_io_wrapper);
         kputs("\nLoaded "); kputs(bios_harddrive_names[i]);
+
+        add_partitioned_medium(bios_harddrive_names[i]);
 
         j++;
     }
@@ -116,7 +118,7 @@ uint8_t bios_harddisk_read(uint8_t drive, uint64_t loc) {
     cached_drive = drive;
     cached_block = block;
     cache_status = 1;
-    
+
     return disk_cache[offset];
 }
 
@@ -143,7 +145,7 @@ int bios_harddisk_write(uint8_t drive, uint64_t loc, uint8_t payload) {
     ENABLE_INTERRUPTS;
     cached_drive = drive;
     cached_block = block;
-    
+
     disk_cache[offset] = payload;
     cache_status = CACHE_DIRTY;
     return 0;
