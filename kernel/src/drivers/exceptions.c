@@ -36,28 +36,19 @@ static const char *exception_names[] = {
 };
 
 void exception_handler(int exception_number, struct gpr_state *state, int has_error_code, uint32_t error_code) {
-    tty_kputs("\n", 0);
-    tty_kputs(exception_names[exception_number], 0);
+    kprint(KPRN_WARN, "%s occurred at: %x:%x", exception_names[exception_number],
+           state->cs, state->eip);
 
-    tty_kputs("\nException occurred at: ", 0);
-    tty_kxtoa(state->cs, 0);
-    text_putchar(':', 0);
-    tty_kxtoa(state->eip, 0);
+    if (has_error_code)
+        kprint(KPRN_WARN, "Error code: %x", error_code);
 
-    if (has_error_code) {
-        tty_kputs("\nError code: ", 0);
-        tty_kxtoa(error_code, 0);
+    if (state->cs == 0x08 || state->cs == 0x19) {
+        switch_tty(0);
+        panic(state, false, "In-kernel exception, system halted.");
     }
 
-    if (state->cs == 0x08) {
-        tty_kputs("\nIn-kernel exception, system halted.", 0);
-        for (;;)
-            asm volatile ("hlt");
-    }
+    kprint(KPRN_WARN, "Last syscall: %x", last_syscall);
 
-    tty_kputs("\nLast syscall: ", 0);
-    tty_kxtoa(last_syscall, 0);
-
-    tty_kputs("\nTask terminated.\n", 0);
+    kprint(KPRN_WARN, "Task terminated.");
     task_quit(current_task, -1);
 }

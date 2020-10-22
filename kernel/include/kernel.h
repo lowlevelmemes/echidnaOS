@@ -5,6 +5,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stivale.h>
 
 // kernel tunables
@@ -119,6 +121,15 @@
                     "hlt;"      \
                     "jmp 1b;"   \
                  )
+
+#define KPRN_INFO   0
+#define KPRN_WARN   1
+#define KPRN_ERR    2
+#define KPRN_DBG    3
+#define KPRN_PANIC  4
+
+void kprint(int type, const char *fmt, ...);
+void kvprint(int type, const char *fmt, va_list args);
 
 struct dt_entry {
     uint16_t limit_low;
@@ -428,7 +439,8 @@ extern tty_t tty[KRNL_TTY_COUNT];
 extern device_t* device_list;
 extern uint32_t device_ptr;
 
-void panic(const char *msg);
+__attribute__((noreturn))
+void panic(struct gpr_state *regs, bool print_trace, const char *fmt, ...);
 
 void task_init(void);
 

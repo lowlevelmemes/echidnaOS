@@ -32,9 +32,7 @@ uint16_t syscall_new_segment(uint32_t base, uint32_t page_count, int code) {
 
 void syscall_log(const char *msg) {
     msg += task_table[current_task]->base;
-    for (size_t i = 0; msg[i]; i++)
-        port_out_b(0xe9, msg[i]);
-    port_out_b(0xe9, '\n');
+    kputs(msg);
 }
 
 int lseek(int handle, int offset, int type) {

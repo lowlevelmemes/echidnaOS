@@ -8,10 +8,10 @@ task_t** task_table;
 void task_init(void) {
     // allocate the task table
     if ((task_table = kalloc(KRNL_MAX_TASKS * sizeof(task_t*))) == 0)
-        panic("unable to allocate task table");
+        panic(NULL, false, "unable to allocate task table");
     // create kernel task
     if ((task_table[0] = kalloc(sizeof(task_t))) == 0)
-        panic("unable to allocate kernel task");
+        panic(NULL, false, "unable to allocate kernel task");
     kstrcpy(task_table[0]->pwd, "/");
     kstrcpy(task_table[0]->name, "kernel");
     task_table[0]->status = KRN_STAT_RES_TASK;
@@ -451,7 +451,7 @@ void task_scheduler(void) {
                     }
                     break;
                 default:
-                    panic("unrecognised iowait_type");
+                    panic(NULL, false, "unrecognised iowait_type");
                 }
             case KRN_STAT_ACTIVE_TASK:
                 idle_cpu = 0;
@@ -467,7 +467,7 @@ void task_scheduler(void) {
                 current_task++;
                 continue;
             default:
-                panic("unrecognised task status");
+                panic(NULL, false, "unrecognised task status");
         }
 
     }
