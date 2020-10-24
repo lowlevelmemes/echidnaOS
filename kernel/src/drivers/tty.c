@@ -124,6 +124,10 @@ static uint8_t ansi_colours[] = { 0, 4, 2, 6, 1, 5, 3, 7 };
 
 void sgr(uint8_t which_tty) {
 
+    if (tty[which_tty].esc_value0 == 0) {
+        text_set_text_palette(TTY_DEF_TXT_PAL, which_tty);
+    }
+
     if (tty[which_tty].esc_value0 >= 30 && tty[which_tty].esc_value0 <= 37) {
         uint8_t pal = text_get_text_palette(which_tty);
         pal = (pal & 0xf0) + ansi_colours[tty[which_tty].esc_value0 - 30];

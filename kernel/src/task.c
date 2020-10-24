@@ -24,7 +24,7 @@ static int idle_cpu = 1;
 
 void task_spinup(void*);
 
-static const struct gpr_state default_cpu_status = { 0,0,0,0,0,0,0, 0x33,0x33,0x33,0x33, 0,0x2b,0x1202,0,0x33};
+static const struct gpr_state default_cpu_status = { 0,0,0,0,0,0,0, 0x33,0x33,0x33,0x33, {0,0x2b,0x1202,0,0x33}};
 
 int task_create(task_t new_task) {
     // find an empty entry in the task table
@@ -386,8 +386,8 @@ void task_scheduler(void) {
         if (!task_table[current_task]) {
             current_task = 0;
             if (idle_cpu) {
-            // if no process took CPU time, wait for the next
-            // context switch idling
+                // if no process took CPU time, wait for the next
+                // context switch idling
                 ENTER_IDLE;
             }
             idle_cpu = 1;
@@ -480,6 +480,8 @@ void task_quit_self(int64_t return_value) {
     task_quit(current_task, return_value);
 }
 
+void syscall_unlock(void);
+
 void task_quit(int pid, int64_t return_value) {
     int parent = task_table[pid]->parent;
     if (task_table[parent]->status == KRN_STAT_PROCWAIT_TASK) {
@@ -492,8 +494,12 @@ void task_quit(int pid, int64_t return_value) {
     kfree((void*)task_table[pid]->base);
     kfree((void*)task_table[pid]);
     task_table[pid] = EMPTY_PID;
-    DISABLE_INTERRUPTS;
-    ts_enable = 1;
-    escalate_privilege();
-    task_scheduler();
+
+    if (pid == current_task) {
+        DISABLE_INTERRUPTS;
+        ts_enable = 1;
+        syscall_unlock();
+        escalate_privilege();
+        task_scheduler();
+    }
 }

@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
     vfs_metadata_t metadata = {0};
 
     for (;;) {
-        printf("\e[32mechidnaOS\e[37m:\e[36m%s\e[37m# ", getcwd(pwd, 2048));
+        printf("\e[32mechidnaOS\e[0m:\e[36m%s\e[0m# ", getcwd(pwd, 2048));
         fflush(stdout);
 
         fgets(input, 256, stdin);
@@ -213,7 +213,7 @@ int main(int argc, char** argv) {
                 if (metadata.filetype == 1) fputs("\e[36m", stdout);
                 if (metadata.filetype == 2) fputs("\e[33m", stdout);
                 printf("%s", metadata.filename);
-                fputs("\e[37m", stdout);
+                fputs("\e[0m", stdout);
                 putchar('\n');
             }
         }

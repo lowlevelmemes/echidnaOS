@@ -246,22 +246,14 @@ escalate_priv_isr:
     jmp eax
 
 irq0_handler:
-        cmp dword [ss:ts_enable], 0
-        je .ts_abort
-        ; save task status
-        push gs
-        push fs
-        push es
-        push ds
-        push ebp
-        push edi
-        push esi
-        push edx
-        push ecx
-        push ebx
         push eax
         mov al, 0x20    ; acknowledge interrupt to PIC0
         out 0x20, al
+        pop eax
+        cmp dword [ss:ts_enable], 0
+        je .ts_abort
+        ; save task status
+        pusham
         mov ax, 0x10
         mov ds, ax
         mov es, ax
@@ -270,57 +262,51 @@ irq0_handler:
         push esp
         call task_switch
     .ts_abort:
-        push eax
-        mov al, 0x20    ; acknowledge interrupt to PIC0
-        out 0x20, al
-        pop eax
         iretd
 
 keyboard_isr:
-        push eax
-        push ebx
-        push ecx
-        push edx
-        push esi
-        push edi
-        push ebp
-        push ds
-        push es
-        mov ax, 0x21
+        pusham
+        mov ax, 0x10
         mov ds, ax
         mov es, ax
+        mov fs, ax
+        mov gs, ax
         xor eax, eax
         in al, 0x60     ; read from keyboard
-        cmp al, 0x01
-        jne .notpausebreak
-        ;push 0
-        ;call task_quit_self
-        ;add esp, 4
-        jmp .continue
-.notpausebreak:
         push eax
         call keyboard_handler
         add esp, 4
-.continue:
         mov al, 0x20    ; acknowledge interrupt to PIC0
         out 0x20, al
-        pop es
-        pop ds
-        pop ebp
-        pop edi
-        pop esi
-        pop edx
-        pop ecx
-        pop ebx
-        pop eax
+        popam
         iretd
+
+extern syscall_stack
 
 global last_syscall
 last_syscall dd -1
 
-syscall:
+syscall_giant_lock dd 0
+
+global syscall_unlock
+syscall_unlock:
+    lock btr dword [syscall_giant_lock], 0
+    ret
+
 ; ARGS in EAX (call code), ECX, EDX, EDI, ESI
 ; return value in EAX/EDX
+syscall:
+        sub dword [ss:syscall_stack], 5*4  ; subtract the iret frame
+        sti
+
+    .giant_lock_spin:
+        lock bts dword [ss:syscall_giant_lock], 0
+        jnc .giant_lock_taken
+        pause
+        jmp .giant_lock_spin
+
+    .giant_lock_taken:
+        cli
         mov dword [ss:last_syscall], eax
         ; special routines check
         cmp eax, 0x0d
@@ -369,6 +355,8 @@ syscall:
         cli
         mov dword [ts_enable], 1
         ; return
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         pop gs
         pop fs
         pop es
@@ -406,6 +394,8 @@ vfs_read_isr:
         cli
         mov dword [ts_enable], 1
         ; done
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         pop gs
         pop fs
         pop es
@@ -471,6 +461,8 @@ vfs_write_isr:
         ; disable all interrupts, reenable task switch
         cli
         mov dword [ts_enable], 1
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         ; done
         pop gs
         pop fs
@@ -538,6 +530,8 @@ read_isr:
         ; disable all interrupts, reenable task switch
         cli
         mov dword [ts_enable], 1
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         cmp dword [read_stat], 1     ; if I/O is not ready
         ; done
         pop gs
@@ -606,6 +600,8 @@ write_isr:
         ; disable all interrupts, reenable task switch
         cli
         mov dword [ts_enable], 1
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         cmp dword [write_stat], 1     ; if I/O is not ready
         ; done
         pop gs
@@ -675,6 +671,8 @@ gen_exec_block_isr:
         ; disable all interrupts, reenable task switch
         cli
         mov dword [ts_enable], 1
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         ; done
         cmp eax, -1
         je .abort
@@ -698,6 +696,8 @@ gen_exec_block_isr:
         iretd
 
 ipc_await:
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         ; save task status
         push gs
         push fs
@@ -721,6 +721,8 @@ ipc_await:
         call task_switch
 
 vdev_await:
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         ; save task status
         push gs
         push fs
@@ -744,6 +746,8 @@ vdev_await:
         call task_switch
 
 fork_isr:
+        lock btr dword [syscall_giant_lock], 0
+        add dword [syscall_stack], 5*4  ; add the iret frame
         ; save task status
         push gs
         push fs

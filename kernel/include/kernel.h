@@ -115,9 +115,9 @@
 #define ENTER_IDLE              \
     asm volatile (              \
                     "call escalate_privilege;" \
+                    "1:"        \
                     "mov esp, OFFSET ring0_stack.top;" \
                     "sti;"      \
-                    "1:"        \
                     "hlt;"      \
                     "jmp 1b;"   \
                  )
