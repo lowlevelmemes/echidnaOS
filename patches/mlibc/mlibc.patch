@@ -385,7 +385,7 @@ index 0000000..282953f
 +
 diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
-index 0000000..8f56608
+index 0000000..057f608
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 @@ -0,0 +1,292 @@
@@ -484,7 +484,7 @@ index 0000000..8f56608
 +
 +        asm volatile ("int $0x80"
 +                : "=a"(discard1), "=d"(discard2)
-+                : "a"(0x03), "c"(path), "d"(argv), "S"(envp)
++                : "a"(0x03), "c"(path), "d"(argv), "D"(envp)
 +                : "memory");
 +
 +        return EIO;
