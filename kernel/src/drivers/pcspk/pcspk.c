@@ -6,11 +6,11 @@ static uint16_t div = 0;
 static uint32_t freq = 0;
 static int get_freq = 4;
 
-int pcspk_io_read(void) {
+static int pcspk_io_read(void) {
     return div;
 }
 
-int pcspk_io_write(uint8_t payload) {
+static int pcspk_io_write(uint8_t payload) {
     freq *= 0x100;
     freq += payload;
 
@@ -30,9 +30,9 @@ int pcspk_io_write(uint8_t payload) {
 
         port_out_b(0x42, (div & 0xff));
         port_out_b(0x42, (div & 0xff00) >> 8);
-        
+
         port_out_b(0x61, (port_in_b(0x61) | 0b00000011));
-        
+
         freq = 0;
         return 0;
     }

@@ -480,7 +480,6 @@ void set_PIC0_mask(uint8_t mask);
 void set_PIC1_mask(uint8_t mask);
 uint8_t get_PIC0_mask(void);
 uint8_t get_PIC1_mask(void);
-void init_pic(void);
 
 void set_pit_freq(uint32_t frequency);
 

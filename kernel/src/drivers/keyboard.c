@@ -44,12 +44,6 @@ static const char ascii_nomod[] = {
     'b', 'n', 'm', ',', '.', '/', '\0', '\0', '\0', ' '
 };
 
-int keyboard_io_wrapper(uint32_t unused0, uint64_t unused1, int type, uint8_t payload) {
-    switch (type) {
-        default: return -1;
-    }
-}
-
 void keyboard_init(void) {
     // reset keyboard LEDs
     /*
@@ -57,7 +51,6 @@ void keyboard_init(void) {
     while (port_in_b(0x64) & 0x02);
     port_out_b(0x60, led_status);
     */
-    kernel_add_device("keyboard", 0, 0, &keyboard_io_wrapper);
     return;
 }
 

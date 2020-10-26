@@ -86,6 +86,7 @@ extern vfs_list
 extern vfs_get_metadata
 extern general_execute
 extern general_execute_block
+extern execve
 extern register_vdev
 extern vdev_in_ready
 extern vdev_out_ready
@@ -107,7 +108,7 @@ routine_list:
         dd      task_quit_self          ; 0x00
         dd      general_execute         ; 0x01
         dd      0 ;general_execute_block; 0x02 - dummy entry
-        dd      0                       ; 0x03
+        dd      execve                  ; 0x03
         dd      syscall_log             ; 0x04
         dd      0 ;task_fork            ; 0x05 - dummy entry
         dd      syscall_new_segment     ; 0x06
@@ -281,32 +282,12 @@ keyboard_isr:
         popam
         iretd
 
-extern syscall_stack
-
 global last_syscall
 last_syscall dd -1
-
-syscall_giant_lock dd 0
-
-global syscall_unlock
-syscall_unlock:
-    lock btr dword [syscall_giant_lock], 0
-    ret
 
 ; ARGS in EAX (call code), ECX, EDX, EDI, ESI
 ; return value in EAX/EDX
 syscall:
-        sub dword [ss:syscall_stack], 5*4  ; subtract the iret frame
-        sti
-
-    .giant_lock_spin:
-        lock bts dword [ss:syscall_giant_lock], 0
-        jnc .giant_lock_taken
-        pause
-        jmp .giant_lock_spin
-
-    .giant_lock_taken:
-        cli
         mov dword [ss:last_syscall], eax
         ; special routines check
         cmp eax, 0x0d
@@ -355,8 +336,6 @@ syscall:
         cli
         mov dword [ts_enable], 1
         ; return
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         pop gs
         pop fs
         pop es
@@ -394,8 +373,6 @@ vfs_read_isr:
         cli
         mov dword [ts_enable], 1
         ; done
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         pop gs
         pop fs
         pop es
@@ -461,8 +438,6 @@ vfs_write_isr:
         ; disable all interrupts, reenable task switch
         cli
         mov dword [ts_enable], 1
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         ; done
         pop gs
         pop fs
@@ -530,8 +505,6 @@ read_isr:
         ; disable all interrupts, reenable task switch
         cli
         mov dword [ts_enable], 1
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         cmp dword [read_stat], 1     ; if I/O is not ready
         ; done
         pop gs
@@ -600,8 +573,6 @@ write_isr:
         ; disable all interrupts, reenable task switch
         cli
         mov dword [ts_enable], 1
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         cmp dword [write_stat], 1     ; if I/O is not ready
         ; done
         pop gs
@@ -671,8 +642,6 @@ gen_exec_block_isr:
         ; disable all interrupts, reenable task switch
         cli
         mov dword [ts_enable], 1
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         ; done
         cmp eax, -1
         je .abort
@@ -696,8 +665,6 @@ gen_exec_block_isr:
         iretd
 
 ipc_await:
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         ; save task status
         push gs
         push fs
@@ -721,8 +688,6 @@ ipc_await:
         call task_switch
 
 vdev_await:
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         ; save task status
         push gs
         push fs
@@ -746,8 +711,6 @@ vdev_await:
         call task_switch
 
 fork_isr:
-        lock btr dword [syscall_giant_lock], 0
-        add dword [syscall_stack], 5*4  ; add the iret frame
         ; save task status
         push gs
         push fs

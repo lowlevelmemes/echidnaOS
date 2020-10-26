@@ -54,7 +54,6 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     init_com();
     init_stty();
     init_pcspk();
-    init_pic();
     keyboard_init();
 
 
@@ -102,9 +101,9 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     // launch the shell
     kputs("\nKERNEL INIT DONE!\n");
 
-    switch_tty(1);
+    //switch_tty(1);
 
-    kstrcpy(tty_path, "/dev/tty1");
+    kstrcpy(tty_path, "/dev/tty0");
     general_execute(&shell_exec);
     kstrcpy(tty_path, "/dev/tty2");
     general_execute(&shell_exec);

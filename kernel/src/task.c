@@ -48,26 +48,8 @@ int task_create(task_t new_task) {
 extern filesystem_t* filesystems;
 int vfs_translate_fs(int mountpoint);
 
-void task_fork(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi, uint32_t ebp, uint32_t ds, uint32_t es, uint32_t fs, uint32_t gs, uint32_t eip, uint32_t cs, uint32_t eflags, uint32_t esp, uint32_t ss) {
-
-    // forks the current task in a Unix-like way
-
-    task_table[current_task]->cpu.eax = eax;
-    task_table[current_task]->cpu.ebx = ebx;
-    task_table[current_task]->cpu.ecx = ecx;
-    task_table[current_task]->cpu.edx = edx;
-    task_table[current_task]->cpu.esi = esi;
-    task_table[current_task]->cpu.edi = edi;
-    task_table[current_task]->cpu.ebp = ebp;
-    task_table[current_task]->cpu.esp = esp;
-    task_table[current_task]->cpu.eip = eip;
-    task_table[current_task]->cpu.cs = cs;
-    task_table[current_task]->cpu.ds = ds;
-    task_table[current_task]->cpu.es = es;
-    task_table[current_task]->cpu.fs = fs;
-    task_table[current_task]->cpu.gs = gs;
-    task_table[current_task]->cpu.ss = ss;
-    task_table[current_task]->cpu.eflags = eflags;
+void task_fork(struct gpr_state *cpu) {
+    task_table[current_task]->cpu = *cpu;
 
     task_t new_process = *task_table[current_task];
 
@@ -256,12 +238,14 @@ int general_execute(task_info_t* task_info) {
     char** argv = (char**)(task_table[new_pid]->base + 0x1010);
     char** src_argv = (char**)((uint32_t)task_info->argv + task_table[current_task]->base);
     // copy the argv's
-    for (int i = 0; i < task_info->argc; i++) {
+    int i = 0;
+    for ( ; i < task_info->argc; i++) {
         kstrcpy( (char*)(task_table[new_pid]->base + argv_limit),
                  (char*)(src_argv[i] + task_table[current_task]->base) );
         argv[i] = (char*)argv_limit;
         argv_limit += kstrlen((char*)(src_argv[i] + task_table[current_task]->base)) + 1;
     }
+    argv[i] = NULL;
 
     // debug logging
 /*
@@ -467,6 +451,8 @@ void task_scheduler(void) {
                 current_task++;
                 continue;
             default:
+                kprint(0, "%u %x %u ", current_task,
+    task_table[current_task]->base, task_table[current_task]->status);
                 panic(NULL, false, "unrecognised task status");
         }
 
@@ -479,8 +465,6 @@ extern int ts_enable;
 void task_quit_self(int64_t return_value) {
     task_quit(current_task, return_value);
 }
-
-void syscall_unlock(void);
 
 void task_quit(int pid, int64_t return_value) {
     int parent = task_table[pid]->parent;
@@ -498,8 +482,104 @@ void task_quit(int pid, int64_t return_value) {
     if (pid == current_task) {
         DISABLE_INTERRUPTS;
         ts_enable = 1;
-        syscall_unlock();
         escalate_privilege();
         task_scheduler();
     }
+}
+
+int execve(char *path, char **argv, char **envp) {
+    int i;
+    int argc;
+    char **tmp_argv = kalloc(sizeof(char *) * 256);
+    char **tmp_envp = kalloc(sizeof(char *) * 256);
+
+    path += task_table[current_task]->base;
+    argv  = (char*)argv + task_table[current_task]->base;
+    envp  = (char*)envp + task_table[current_task]->base;
+
+    size_t prev_base = task_table[current_task]->base;
+
+    vfs_metadata_t metadata;
+    if (vfs_kget_metadata(path, &metadata, FILE_TYPE) == -2) return FAILURE;
+
+    size_t pages = (TASK_RESERVED_SPACE + metadata.size + DEFAULT_STACK) / PAGE_SIZE;
+    if ((TASK_RESERVED_SPACE + metadata.size + DEFAULT_STACK) % PAGE_SIZE) pages++;
+
+    /* copy argv in a tmp buffer */
+    for (i = 0; i < 256; i++) {
+        if (!argv[i])
+            break;
+        char *tmp_ptr = argv[i] + task_table[current_task]->base;
+        tmp_argv[i] = kalloc(kstrlen(tmp_ptr) + 1);
+        kstrcpy(tmp_argv[i], argv[i]);
+    }
+    tmp_argv[i] = 0;
+    argc = i;
+
+    /* copy envp in a tmp buffer */
+    for (i = 0; i < 256; i++) {
+        if (!envp[i])
+            break;
+        char *tmp_ptr = envp[i] + task_table[current_task]->base;
+        tmp_envp[i] = kalloc(kstrlen(tmp_ptr) + 1);
+        kstrcpy(tmp_envp[i], envp[i]);
+    }
+    tmp_envp[i] = 0;
+
+    /* reset CPU status */
+    task_table[current_task]->cpu = default_cpu_status;
+
+    // load program into memory
+    size_t base = (size_t)kalloc(pages * PAGE_SIZE);
+
+    // use the new VFS stack
+    int tmp_handle = vfs_kopen(path, O_RDWR, 0);
+    vfs_kuread(tmp_handle, (char *)(base + TASK_RESERVED_SPACE), metadata.size);
+    vfs_kclose(tmp_handle);
+
+    task_table[current_task]->status = KRN_STAT_ACTIVE_TASK;
+    task_table[current_task]->base = base;
+
+    task_table[current_task]->cpu.esp = ((TASK_RESERVED_SPACE + metadata.size + DEFAULT_STACK) - 1) & 0xfffffff0;
+    task_table[current_task]->cpu.eip = TASK_RESERVED_SPACE;
+
+    task_table[current_task]->heap_base = pages * PAGE_SIZE;
+    task_table[current_task]->heap_size = 0;
+
+    *((int *)(base + 0x1000)) = argc;
+    int argv_limit = 0x4000;
+    char **dest_argv = (char **)(base + 0x1010);
+
+    /* prepare argv */
+    for (i = 0; tmp_argv[i]; i++) {
+        kstrcpy((char *)(base + argv_limit), tmp_argv[i]);
+        dest_argv[i] = (char *)argv_limit;
+        argv_limit += kstrlen(tmp_argv[i]) + 1;
+        kfree(tmp_argv[i]);
+    }
+    /* argv null ptr as per standard */
+    dest_argv[i] = (char *)0;
+
+    int envp_limit = 0x8000;
+    char **dest_envp = (char **)(base + 0x1020);
+
+    /* prepare environ */
+    for (i = 0; tmp_envp[i]; i++) {
+        kstrcpy((char *)(base + envp_limit), tmp_envp[i]);
+        dest_envp[i] = (char *)envp_limit;
+        envp_limit += kstrlen(tmp_envp[i]) + 1;
+        kfree(tmp_envp[i]);
+    }
+    /* environ null ptr as per standard */
+    dest_envp[i] = (char *)0;
+
+    // free previously used memory
+    kfree((void*)prev_base);
+    kfree(tmp_argv);
+    kfree(tmp_envp);
+
+    DISABLE_INTERRUPTS;
+    ts_enable = 1;
+    escalate_privilege();
+    task_scheduler();
 }

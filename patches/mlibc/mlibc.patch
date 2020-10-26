@@ -385,10 +385,10 @@ index 0000000..282953f
 +
 diff --git a/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
 new file mode 100644
-index 0000000..e2f73d5
+index 0000000..8f56608
 --- /dev/null
 +++ b/mlibc-workdir/sysdeps/echidnaos/generic/generic.cpp
-@@ -0,0 +1,281 @@
+@@ -0,0 +1,292 @@
 +
 +#include <bits/ensure.h>
 +#include <mlibc/debug.hpp>
@@ -477,6 +477,17 @@ index 0000000..e2f73d5
 +                : "a"(0x00), "c"(status)
 +                : "edx", "memory"
 +        );
++    }
++
++    int sys_execve(const char *path, char *const argv[], char *const envp[]) {
++        int discard1, discard2;
++
++        asm volatile ("int $0x80"
++                : "=a"(discard1), "=d"(discard2)
++                : "a"(0x03), "c"(path), "d"(argv), "S"(envp)
++                : "memory");
++
++        return EIO;
 +    }
 +
 +    int sys_tcb_set(void *pointer) STUB_ONLY
