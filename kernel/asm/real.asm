@@ -1,96 +1,129 @@
-extern map_PIC
-extern get_PIC0_mask
-extern get_PIC1_mask
-extern set_PIC0_mask
-extern set_PIC1_mask
-
-extern escalate_privilege
-extern deescalate_privilege
-
-global real_routine
+%define RELADDR(origin, label, addr) (((addr)-(label))+(origin))
 
 section .data
 
-%define real_init_size  real_init_end - real_init
-real_init:              incbin "blobs/real_init.bin"
-real_init_end:
+global rm_int_begin
+global rm_int_end
+rm_int_begin:
+    %define RMINTREL(addr) (RELADDR(0xf000, rm_int_begin, (addr)))
 
-PIC0_saved_mask dd 0
-PIC1_saved_mask dd 0
+    ; Self-modifying code: int $int_no
+    mov al, byte [esp+4]
+    mov byte [RMINTREL(.int_no)], al
 
-section .text
+    ; Save out_regs
+    mov eax, dword [esp+8]
+    mov dword [RMINTREL(.out_regs)], eax
 
-bits 32
+    ; Save in_regs
+    mov eax, dword [esp+12]
+    mov dword [RMINTREL(.in_regs)], eax
 
-real_routine:
-    ; ESI = routine location
-    ; ECX = routine size
+    sidt [RMINTREL(.idt)]
+    lidt [RMINTREL(.rm_idt)]
 
-    push esi
-    push ecx
-
-    ; Remap PIC for a real mode environment
-    push 0x00000070
-    push 0x00000008
-    call map_PIC
-    add esp, 8
-
-    ; Save PIC masks
-    push eax
-    call get_PIC0_mask
-    mov dword [PIC0_saved_mask], eax
-    call get_PIC1_mask
-    mov dword [PIC1_saved_mask], eax
-    pop eax
-
-    ; Change PIC masks
-    push 10111110b
-    call set_PIC0_mask
-    add esp, 4
-    push 00111110b
-    call set_PIC1_mask
-    add esp, 4
-
-    ; Real mode init blob to 0000:1000
-    mov esi, real_init
-    mov edi, 0x1000
-    mov ecx, real_init_size
-    rep movsb
-
-    ; Routine's blob to 0000:8000
-    pop ecx
-    pop esi
-    mov edi, 0x8000
-    rep movsb
-
+    ; Save non-scratch GPRs
     push ebx
-    call escalate_privilege
-    pop ebx
-    push eax
+    push esi
+    push edi
+    push ebp
+    pushfd
 
-    ; Call module
-    call 0x1000
+    ; Jump to real mode
+    jmp 0x38:RMINTREL(.bits16)
+  .bits16:
+    bits 16
+    mov ax, 0x40
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    mov eax, cr0
+    and al, 0xfe
+    mov cr0, eax
+    jmp 0x00:RMINTREL(.cszero)
+  .cszero:
+    xor ax, ax
+    mov ss, ax
 
+    ; Load in_regs
+    mov dword [ss:RMINTREL(.esp)], esp
+    mov esp, dword [ss:RMINTREL(.in_regs)]
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    popfd
+    pop ebp
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
     pop ebx
-    test ebx, ebx
-    jz .no_deescalate
-    push eax
-    call deescalate_privilege
     pop eax
-  .no_deescalate:
+    mov esp, dword [ss:RMINTREL(.esp)]
 
-    ; Remap PIC for a pmode environment
-    push 0x00000028
-    push 0x00000020
-    call map_PIC
-    add esp, 8
+    sti
 
-    ; Restore PIC masks
-    push dword [PIC0_saved_mask]
-    call set_PIC0_mask
-    add esp, 4
-    push dword [PIC1_saved_mask]
-    call set_PIC1_mask
-    add esp, 4
+    ; Indirect interrupt call
+    db 0xcd
+  .int_no:
+    db 0
 
+    cli
+
+    ; Load out_regs
+    mov dword [ss:RMINTREL(.esp)], esp
+    mov esp, dword [ss:RMINTREL(.out_regs)]
+    lea esp, [esp + 10*4]
+    push eax
+    push ebx
+    push ecx
+    push edx
+    push esi
+    push edi
+    push ebp
+    pushfd
+    push ds
+    push es
+    push fs
+    push gs
+    mov esp, dword [ss:RMINTREL(.esp)]
+
+    ; Restore IDT
+    lidt [ss:RMINTREL(.idt)]
+
+    ; Jump back to pmode
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
+    jmp 0x08:RMINTREL(.bits32)
+  .bits32:
+    bits 32
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    ; Restore non-scratch GPRs
+    popfd
+    pop ebp
+    pop edi
+    pop esi
+    pop ebx
+
+    ; Exit
     ret
+
+align 16
+  .esp:      dd 0
+  .out_regs: dd 0
+  .in_regs:  dd 0
+  .idt:      dq 0
+  .rm_idt:   dw 0x3ff
+             dd 0
+
+rm_int_end:

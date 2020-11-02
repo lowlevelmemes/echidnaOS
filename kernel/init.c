@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <kernel.h>
+#include <cio.h>
 #include <stivale.h>
 
 uint32_t memory_size;
@@ -9,6 +10,8 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     #ifdef _SERIAL_KERNEL_OUTPUT_
       debug_kernel_console_init();
     #endif
+
+    init_realmode();
 
     // setup the PIC's mask
     set_PIC0_mask(0b11111111); // disable all IRQs
@@ -26,13 +29,14 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     #endif
 
     // disable VGA cursor
-    vga_disable_cursor();
+    port_out_b(0x3d4, 0x0a);
+    port_out_b(0x3d5, 0x20);
 
     init_tty();
     switch_tty(0);
 
     // detect memory
-    memory_size = detect_mem();
+    memory_size = 0xffffffff; // XXX
     init_kalloc();
 
     // increase speed of the PIT

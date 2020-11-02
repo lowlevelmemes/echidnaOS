@@ -1,17 +1,16 @@
 #include <stdint.h>
 #include <kernel.h>
 
-typedef struct {
-    uint8_t drive;
-    uint32_t cyl_count;
-    uint32_t head_count;
-    uint32_t sect_per_track;
-    uint64_t sect_count;
-} drive_parameters_t;
-
-void disk_load_sector(uint8_t, uint8_t*, uint64_t);
-void disk_write_sector(uint8_t, uint8_t*, uint64_t);
-void read_drive_parameters(drive_parameters_t* drive_parameters);
+struct bios_drive_params {
+    uint16_t buf_size;
+    uint16_t info_flags;
+    uint32_t cyl;
+    uint32_t heads;
+    uint32_t sects;
+    uint64_t lba_count;
+    uint16_t bytes_per_sect;
+    uint32_t edd;
+} __attribute__((packed));
 
 #define BIOS_DRIVES_START 0x80
 #define BIOS_DRIVES_MAX 26
@@ -43,6 +42,93 @@ uint8_t bios_harddisk_read(uint8_t drive, uint64_t loc);
 int bios_harddisk_write(uint8_t drive, uint64_t loc, uint8_t payload);
 int bios_harddisks_io_wrapper(uint32_t disk, uint64_t loc, int type, uint8_t payload);
 
+struct dap {
+    uint16_t size;
+    uint16_t count;
+    uint16_t offset;
+    uint16_t segment;
+    uint64_t lba;
+};
+
+static void disk_read_sector(uint8_t drive, uint8_t *buf, uint64_t block) {
+    uint8_t tmp[BYTES_PER_SECT];
+
+    struct dap dap;
+    dap.size    = 16;
+    dap.count   = 1;
+    dap.segment = rm_seg(tmp);
+    dap.offset  = rm_off(tmp);
+
+    for (size_t i = 0; i < CACHE_SECTS; i++) {
+        dap.lba = block + i;
+
+        struct rm_regs r = {0};
+        r.eax = 0x4200;
+        r.edx = drive;
+        r.esi = rm_off(&dap);
+        r.ds  = rm_seg(&dap);
+
+        rm_int(0x13, &r, &r);
+
+        if (r.eflags & EFLAGS_CF) {
+            int ah = (r.eax >> 8) & 0xff;
+            panic(NULL, false, "Disk error %x. Drive %x, LBA %x.\n", ah, drive, dap.lba);
+        }
+
+        memcpy(buf + BYTES_PER_SECT*i, tmp, BYTES_PER_SECT);
+    }
+}
+
+static void disk_write_sector(uint8_t drive, uint8_t *buf, uint64_t block) {
+    uint8_t tmp[BYTES_PER_SECT];
+
+    struct dap dap;
+    dap.size    = 16;
+    dap.count   = 1;
+    dap.segment = rm_seg(tmp);
+    dap.offset  = rm_off(tmp);
+
+    for (size_t i = 0; i < CACHE_SECTS; i++) {
+        dap.lba = block + i;
+
+        memcpy(tmp, buf + BYTES_PER_SECT*i, BYTES_PER_SECT);
+
+        struct rm_regs r = {0};
+        r.eax = 0x4300;
+        r.edx = drive;
+        r.esi = rm_off(&dap);
+        r.ds  = rm_seg(&dap);
+
+        rm_int(0x13, &r, &r);
+
+        if (r.eflags & EFLAGS_CF) {
+            int ah = (r.eax >> 8) & 0xff;
+            panic(NULL, false, "Disk error %x. Drive %x, LBA %x.\n", ah, drive, dap.lba);
+        }
+    }
+}
+
+static bool read_drive_parameters(struct bios_drive_params *dp, int drive) {
+    struct rm_regs r = {0};
+    struct bios_drive_params drive_params;
+
+    r.eax = 0x4800;
+    r.edx = drive;
+    r.ds  = rm_seg(&drive_params);
+    r.esi = rm_off(&drive_params);
+
+    drive_params.buf_size = sizeof(struct bios_drive_params);
+
+    rm_int(0x13, &r, &r);
+
+    if (r.eflags & EFLAGS_CF)
+        return false;
+
+    *dp = drive_params;
+
+    return true;
+}
+
 // kernel_add_device adds an io wrapper to the entries in the dev list
 // arg 0 is a char* pointing to the name of the new device
 // arg 1 is the general purpose value for the device (which gets passed to the wrapper when called)
@@ -51,34 +137,31 @@ int bios_harddisks_io_wrapper(uint32_t disk, uint64_t loc, int type, uint8_t pay
 void init_bios_harddisks(void) {
     kputs("\nInitialising BIOS hard disks...");
 
-    drive_parameters_t drive_parameters;
+    struct bios_drive_params drive_parameters;
 
     int j = BIOS_DRIVES_START;
     for (int i = 0; i < BIOS_DRIVES_MAX; i++) {
         for ( ; j < BIOS_DRIVES_LIMIT; j++) {
             if (j == 0xe0)      // ignore BIOS CD
                 continue;
-            drive_parameters.drive = j;
-            read_drive_parameters(&drive_parameters);
-            if (drive_parameters.sect_count) goto found;
+            if (read_drive_parameters(&drive_parameters, j))
+                goto found;
         }
         // limit exceeded, return
         return;
 found:
-        kputs("\nbios drive:         "); kxtoa(drive_parameters.drive);
-        kputs("\nCylinder count:     "); kuitoa(drive_parameters.cyl_count);
-        kputs("\nHead count:         "); kuitoa(drive_parameters.head_count);
-        kputs("\nSect per track:     "); kuitoa(drive_parameters.sect_per_track);
-        kputs("\nSector count:       "); kuitoa(drive_parameters.sect_count);
-        kernel_add_device(bios_harddrive_names[i], j, drive_parameters.sect_count * BYTES_PER_SECT, &bios_harddisks_io_wrapper);
+        kputs("\nBIOS drive:         "); kxtoa(j);
+        kputs("\nCylinder count:     "); kuitoa(drive_parameters.cyl);
+        kputs("\nHead count:         "); kuitoa(drive_parameters.heads);
+        kputs("\nSect per track:     "); kuitoa(drive_parameters.sects);
+        kputs("\nSector count:       "); kuitoa(drive_parameters.lba_count);
+        kernel_add_device(bios_harddrive_names[i], j, drive_parameters.lba_count * BYTES_PER_SECT, &bios_harddisks_io_wrapper);
         kputs("\nLoaded "); kputs(bios_harddrive_names[i]);
 
         add_partitioned_medium(bios_harddrive_names[i]);
 
         j++;
     }
-
-    return;
 }
 
 // standard kernel io wrapper expects
@@ -113,7 +196,7 @@ uint8_t bios_harddisk_read(uint8_t drive, uint64_t loc) {
     }
 
     DISABLE_INTERRUPTS;
-    disk_load_sector(drive, disk_cache, block * CACHE_SECTS);
+    disk_read_sector(drive, disk_cache, block * CACHE_SECTS);
     ENABLE_INTERRUPTS;
     cached_drive = drive;
     cached_block = block;
@@ -141,7 +224,7 @@ int bios_harddisk_write(uint8_t drive, uint64_t loc, uint8_t payload) {
     }
 
     DISABLE_INTERRUPTS;
-    disk_load_sector(drive, disk_cache, block * CACHE_SECTS);
+    disk_read_sector(drive, disk_cache, block * CACHE_SECTS);
     ENABLE_INTERRUPTS;
     cached_drive = drive;
     cached_block = block;

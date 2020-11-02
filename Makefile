@@ -7,7 +7,7 @@ IMGSIZE := 32768
 all: echidna.img
 
 limine/limine-install:
-	git clone https://github.com/limine-bootloader/limine.git --branch=v0.5.2 --depth=1
+	git clone https://github.com/limine-bootloader/limine.git --branch=v0.5.7 --depth=1
 	cd limine && $(MAKE) limine-install
 
 run:
