@@ -32,6 +32,14 @@ void panic(struct gpr_state *regs, bool print_trace, const char *fmt, ...) {
                            regs->gs);
     }
 
+    if (print_trace) {
+        if (regs == NULL)
+            print_stacktrace(KPRN_PANIC, NULL);
+        else
+            print_stacktrace(KPRN_PANIC, (size_t *)regs->ebp);
+    }
+
+    escalate_privilege();
     asm volatile (
         "1: hlt;"
         "jmp 1b;"

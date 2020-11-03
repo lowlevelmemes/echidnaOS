@@ -72,7 +72,7 @@ static void disk_read_sector(uint8_t drive, uint8_t *buf, uint64_t block) {
 
         if (r.eflags & EFLAGS_CF) {
             int ah = (r.eax >> 8) & 0xff;
-            panic(NULL, false, "Disk error %x. Drive %x, LBA %x.\n", ah, drive, dap.lba);
+            panic(NULL, true, "Disk error %x. Drive %x, LBA %x.\n", ah, drive, dap.lba);
         }
 
         memcpy(buf + BYTES_PER_SECT*i, tmp, BYTES_PER_SECT);
@@ -103,7 +103,7 @@ static void disk_write_sector(uint8_t drive, uint8_t *buf, uint64_t block) {
 
         if (r.eflags & EFLAGS_CF) {
             int ah = (r.eax >> 8) & 0xff;
-            panic(NULL, false, "Disk error %x. Drive %x, LBA %x.\n", ah, drive, dap.lba);
+            panic(NULL, true, "Disk error %x. Drive %x, LBA %x.\n", ah, drive, dap.lba);
         }
     }
 }

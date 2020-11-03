@@ -206,6 +206,7 @@ raise_exception_err_%1:
     push 1
     push eax
     push %1
+    xor ebp, ebp   ; EBP barrier
     call exception_handler
     popam
     iretd
@@ -224,6 +225,7 @@ raise_exception_%1:
     push 0
     push eax
     push %1
+    xor ebp, ebp   ; EBP barrier
     call exception_handler
     popam
     iretd
@@ -261,6 +263,7 @@ irq0_handler:
         mov fs, ax
         mov gs, ax
         push esp
+        xor ebp, ebp   ; EBP barrier
         call task_switch
     .ts_abort:
         iretd
@@ -275,6 +278,7 @@ keyboard_isr:
         xor eax, eax
         in al, 0x60     ; read from keyboard
         push eax
+        xor ebp, ebp   ; EBP barrier
         call keyboard_handler
         add esp, 4
         mov al, 0x20    ; acknowledge interrupt to PIC0
@@ -367,6 +371,7 @@ vfs_read_isr:
         push edi
         push edx
         push ecx
+        xor ebp, ebp   ; EBP barrier
         call vfs_read
         add esp, 16
         ; disable all interrupts, reenable task switch
@@ -433,6 +438,7 @@ vfs_write_isr:
         push edi
         push edx
         push ecx
+        xor ebp, ebp   ; EBP barrier
         call vfs_write
         add esp, 16
         ; disable all interrupts, reenable task switch
@@ -500,6 +506,7 @@ read_isr:
         push edi
         push edx
         push ecx
+        xor ebp, ebp   ; EBP barrier
         call read
         add esp, 16
         ; disable all interrupts, reenable task switch
@@ -568,6 +575,7 @@ write_isr:
         push edi
         push edx
         push ecx
+        xor ebp, ebp   ; EBP barrier
         call write
         add esp, 16
         ; disable all interrupts, reenable task switch
@@ -637,6 +645,7 @@ gen_exec_block_isr:
         push edi
         push edx
         push ecx
+        xor ebp, ebp   ; EBP barrier
         call general_execute_block
         add esp, 16
         ; disable all interrupts, reenable task switch
@@ -682,6 +691,7 @@ ipc_await:
         mov es, ax
         mov fs, ax
         mov gs, ax
+        xor ebp, ebp   ; EBP barrier
         call enter_ipcwait_status
         call escalate_privilege
         push esp
@@ -705,6 +715,7 @@ vdev_await:
         mov es, ax
         mov fs, ax
         mov gs, ax
+        xor ebp, ebp   ; EBP barrier
         call enter_vdevwait_status
         call escalate_privilege
         push esp
@@ -725,4 +736,5 @@ fork_isr:
         push eax
         call escalate_privilege
         push esp
+        xor ebp, ebp   ; EBP barrier
         call task_fork

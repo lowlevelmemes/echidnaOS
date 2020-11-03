@@ -529,4 +529,8 @@ struct rm_regs {
 void init_realmode(void);
 void rm_int(uint8_t int_no, struct rm_regs *out_regs, struct rm_regs *in_regs);
 
+
+char *trace_address(size_t *off, size_t addr);
+void print_stacktrace(int type, size_t *base_ptr);
+
 #endif

@@ -4,20 +4,19 @@ PREFIX =
 C_FILES = init.c $(shell find src -type f -name '*.c')
 H_FILES = $(shell find . -type f -name '*.h')
 ASM_FILES = $(shell find asm -type f -name '*.asm')
-REAL_FILES = $(shell find blobs -type f -name '*.real')
 OBJ = $(C_FILES:.c=.o) $(ASM_FILES:.asm=.o)
-BINS = $(REAL_FILES:.real=.bin)
 
 CHARDFLAGS = \
     -std=gnu11 \
     -fplan9-extensions \
+    -fno-omit-frame-pointer \
     -masm=intel \
     -ffreestanding \
     -fno-stack-protector \
     -mno-80387 \
     -mno-mmx \
     -I./include
-CFLAGS = -flto -O3 -Wall -Wextra -pipe
+CFLAGS = -g -O3 -Wall -Wextra -pipe
 
 LDHARDFLAGS = \
     -lgcc \
@@ -26,19 +25,25 @@ LDHARDFLAGS = \
     -no-pie \
     -static \
     -Tlinker.ld
-LDFLAGS = -flto -O3
+LDFLAGS = -g -O3
 
-echidna.elf: $(BINS) $(OBJ) $(H_FILES)
-	$(CC) $(OBJ) $(LDFLAGS) $(LDHARDFLAGS) -o $@
+.PHONY: clean install
+
+echidna.elf: $(OBJ) $(H_FILES)
+	echo '#include <symlist.h>' > symlist.gen
+	echo '__attribute__((section(".symlist")))' >> symlist.gen
+	echo 'struct symlist_t symlist[] = {{0xffffffff,""}};' >> symlist.gen
+	$(CC) -x c $(CHARDFLAGS) $(CFLAGS) -c symlist.gen -o symlist.o
+	$(CC) $(OBJ) symlist.o $(LDFLAGS) $(LDHARDFLAGS) -o $@
+	./gensyms.sh
+	$(CC) -x c $(CHARDFLAGS) $(CFLAGS) -c symlist.gen -o symlist.o
+	$(CC) $(OBJ) symlist.o $(LDFLAGS) $(LDHARDFLAGS) -o $@
 
 %.o: %.c
 	$(CC) $(CHARDFLAGS) $(CFLAGS) -c $< -o $@
 
-%.bin: %.real
-	nasm $< -f bin -o $@
-
 %.o: %.asm
-	nasm $< -f elf32 -o $@
+	nasm $< -g -f elf32 -o $@
 
 clean:
 	rm -f $(OBJ) $(BINS) echidna.elf

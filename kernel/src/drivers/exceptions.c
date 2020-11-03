@@ -44,7 +44,7 @@ void exception_handler(int exception_number, struct gpr_state *state, int has_er
 
     if (state->cs == 0x08 || state->cs == 0x19) {
         switch_tty(0);
-        panic(state, false, "In-kernel exception, system halted.");
+        panic(state, true, "In-kernel exception, system halted.");
     }
 
     kprint(KPRN_WARN, "Last syscall: %x", last_syscall);

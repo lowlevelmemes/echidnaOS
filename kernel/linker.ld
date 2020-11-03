@@ -6,8 +6,9 @@ SECTIONS
   . = 0x100000;
 
   .stivalehdr : { *(.stivalehdr) }
-  .text   : { *(.text*)   }
-  .rodata : { *(.rodata*) }
-  .data   : { *(.data*)   }
-  .bss    : { *(.bss*) *(COMMON) }
+  .text       : { *(.text*)   }
+  .rodata     : { *(.rodata*) }
+  .data       : { *(.data*)   }
+  .bss        : { *(.bss*) *(COMMON) }
+  .symlist    : { *(.symlist*) }
 }
