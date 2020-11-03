@@ -80,126 +80,61 @@ uint32_t kstrlen(char* str) {
     return len;
 }
 
-static size_t kalloc_base = 0x1000000;
+struct alloc_metadata {
+    size_t pages;
+    size_t size;
+};
 
-void init_kalloc(void) {
-    // creates the first memory chunk
-    heap_chunk_t* root_chunk = (heap_chunk_t*)kalloc_base;
+void* kalloc(size_t size) {
+    size_t page_count = DIV_ROUNDUP(size, PAGE_SIZE);
 
-    root_chunk->free = 1;
-    root_chunk->size = memory_size - kalloc_base - sizeof(heap_chunk_t);
-    root_chunk->prev_chunk = 0;
+    char *ptr = pmm_allocz(page_count + 1);
 
-    return;
+    if (!ptr)
+        return NULL;
+
+    struct alloc_metadata *metadata = (void*)ptr;
+    ptr += PAGE_SIZE;
+
+    metadata->pages = page_count;
+    metadata->size = size;
+
+    return ptr;
 }
 
-void* kalloc(uint32_t size) {
-    // search for a big enough, free heap chunk
-    heap_chunk_t* heap_chunk = (heap_chunk_t*)kalloc_base;
-    uint32_t heap_chunk_ptr;
-    char* area;
+void* krealloc(void* ptr, size_t new_size) {
+    /* check if 0 */
+    if (!ptr)
+        return kalloc(new_size);
 
-    // avoid odd memory allocations, align at 4
-    while (size % 4) size++;
+    /* Reference metadata page */
+    struct alloc_metadata *metadata = (void*)((char *)ptr - PAGE_SIZE);
 
-    for (;;) {
-        if ((heap_chunk->free) && (heap_chunk->size > (size + sizeof(heap_chunk_t)))) {
-            // split off a new heap_chunk
-            heap_chunk_t* new_chunk;
-            new_chunk = (heap_chunk_t*)((uint32_t)heap_chunk + size + sizeof(heap_chunk_t));
-            new_chunk->free = 1;
-            new_chunk->size = heap_chunk->size - (size + sizeof(heap_chunk_t));
-            new_chunk->prev_chunk = (uint32_t)heap_chunk;
-            // resize the old chunk
-            heap_chunk->free = !heap_chunk->free;
-            heap_chunk->size = size;
-            // tell the next chunk where the old chunk is now
-            heap_chunk_t* next_chunk;
-            next_chunk = (heap_chunk_t*)((uint32_t)new_chunk + new_chunk->size + sizeof(heap_chunk_t));
-            next_chunk->prev_chunk = (uint32_t)new_chunk;
-            area = (char*)((uint32_t)heap_chunk + sizeof(heap_chunk_t));
-            break;
-        } else {
-            heap_chunk_ptr = (uint32_t)heap_chunk;
-            heap_chunk_ptr += heap_chunk->size + sizeof(heap_chunk_t);
-            if (heap_chunk_ptr >= memory_size)
-                return (void*)0;
-            heap_chunk = (heap_chunk_t*)heap_chunk_ptr;
-            continue;
-        }
+    if (DIV_ROUNDUP(metadata->size, PAGE_SIZE) == DIV_ROUNDUP(new_size, PAGE_SIZE)) {
+        metadata->size = new_size;
+        return ptr;
     }
 
-    // zero the memory
-    for (uint32_t i = 0; i < size; i++)
-        area[i] = 0;
-    return (void*)area;
-}
+    void *new_ptr = kalloc(new_size);
+    if (new_ptr == NULL)
+        return NULL;
 
-void* krealloc(void* addr, uint32_t new_size) {
-    if (!addr) return kalloc(new_size);
-    if (!new_size) {
-        kfree(addr);
-        return (void*)0;
-    }
-
-    uint32_t heap_chunk_ptr = (uint32_t)addr;
-
-    heap_chunk_ptr -= sizeof(heap_chunk_t);
-    heap_chunk_t* heap_chunk = (heap_chunk_t*)heap_chunk_ptr;
-
-    char* new_ptr;
-    if ((new_ptr = kalloc(new_size)) == 0)
-        return (void*)0;
-
-    while (new_size % 4) new_size++;
-
-    if (heap_chunk->size > new_size)
-        memcpy(new_ptr, (char*)addr, new_size);
+    if (metadata->size > new_size)
+        /* Copy all the data from the old pointer to the new pointer,
+         * within the range specified by `size`. */
+        memcpy(new_ptr, ptr, new_size);
     else
-        memcpy(new_ptr, (char*)addr, heap_chunk->size);
+        memcpy(new_ptr, ptr, metadata->size);
 
-    kfree(addr);
+    kfree(ptr);
 
     return new_ptr;
 }
 
-void kfree(void* addr) {
-    uint32_t heap_chunk_ptr = (uint32_t)addr;
+void kfree(void* ptr) {
+    struct alloc_metadata *metadata = (void*)((char *)ptr - PAGE_SIZE);
 
-    heap_chunk_ptr -= sizeof(heap_chunk_t);
-    heap_chunk_t* heap_chunk = (heap_chunk_t*)heap_chunk_ptr;
-
-    heap_chunk_ptr += heap_chunk->size + sizeof(heap_chunk_t);
-    heap_chunk_t* next_chunk = (heap_chunk_t*)heap_chunk_ptr;
-
-    heap_chunk_t* prev_chunk = (heap_chunk_t*)heap_chunk->prev_chunk;
-
-    // flag chunk as free
-    heap_chunk->free = 1;
-
-    if ((uint32_t)next_chunk >= memory_size) goto skip_next_chunk;
-
-    // if the next chunk is free as well, fuse the chunks into a single one
-    if (next_chunk->free) {
-        heap_chunk->size += next_chunk->size + sizeof(heap_chunk_t);
-        // update next chunk ptr
-        next_chunk = (heap_chunk_t*)((uint32_t)next_chunk + next_chunk->size + sizeof(heap_chunk_t));
-        // update new next chunk's prev to ourselves
-        next_chunk->prev_chunk = (uint32_t)heap_chunk;
-    }
-
-skip_next_chunk:
-    // if the previous chunk is free as well, fuse the chunks into a single one
-    if (prev_chunk) {       // if its not the first chunk
-        if (prev_chunk->free) {
-            prev_chunk->size += heap_chunk->size + sizeof(heap_chunk_t);
-            // notify the next chunk of the change
-            if ((uint32_t)next_chunk < memory_size)
-                next_chunk->prev_chunk = (uint32_t)prev_chunk;
-        }
-    }
-
-    return;
+    pmm_free((void *)metadata, metadata->pages + 1);
 }
 
 uint64_t power(uint64_t x, uint64_t y) {

@@ -3,7 +3,6 @@
 #include <cio.h>
 #include <stivale.h>
 
-uint32_t memory_size;
 extern int ts_enable;
 
 void kernel_init(struct stivale_struct *stivale_struct) {
@@ -36,8 +35,8 @@ void kernel_init(struct stivale_struct *stivale_struct) {
     switch_tty(0);
 
     // detect memory
-    memory_size = 0xffffffff; // XXX
-    init_kalloc();
+    init_pmm((void*)stivale_struct->memory_map_addr,
+                    stivale_struct->memory_map_entries);
 
     // increase speed of the PIT
     set_pit_freq(KRNL_PIT_FREQ);
@@ -46,8 +45,6 @@ void kernel_init(struct stivale_struct *stivale_struct) {
 
     // print intro to tty0
     kputs("Welcome to echidnaOS!\n");
-
-    kputs("\n"); kuitoa(memory_size); kputs(" bytes ("); kuitoa(memory_size / 0x100000); kputs(" MiB) of memory detected.\n");
 
     kputs("\nInitialising drivers...");
     // ******* DRIVER INITIALISATION CALLS GO HERE *******

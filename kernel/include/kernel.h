@@ -429,7 +429,6 @@ typedef struct {
 
 extern int last_syscall;
 
-extern uint32_t memory_size;
 extern int current_task;
 extern task_t** task_table;
 extern uint8_t current_tty;
@@ -444,9 +443,8 @@ void panic(struct gpr_state *regs, bool print_trace, const char *fmt, ...);
 
 void task_init(void);
 
-void init_kalloc(void);
-void* kalloc(uint32_t size);
-void* krealloc(void* addr, uint32_t new_size);
+void* kalloc(size_t size);
+void* krealloc(void* addr, size_t new_size);
 void kfree(void* addr);
 
 void ipc_send_packet(uint32_t pid, char* payload, uint32_t len);
@@ -532,5 +530,56 @@ void rm_int(uint8_t int_no, struct rm_regs *out_regs, struct rm_regs *in_regs);
 
 char *trace_address(size_t *off, size_t addr);
 void print_stacktrace(int type, size_t *base_ptr);
+
+
+void init_pmm(struct stivale_mmap_entry *memmap, size_t entry_count);
+void *pmm_alloc(size_t count);
+void *pmm_allocz(size_t count);
+void pmm_free(void *ptr, size_t count);
+
+
+#define DIV_ROUNDUP(a,b) (((a) + ((b) - 1)) / b)
+
+
+#define FLAT_PTR(PTR) (*((int(*)[])(PTR)))
+
+#define BYTE_PTR(PTR)  (*((uint8_t *)(PTR)))
+#define WORD_PTR(PTR)  (*((uint16_t *)(PTR)))
+#define DWORD_PTR(PTR) (*((uint32_t *)(PTR)))
+#define QWORD_PTR(PTR) (*((uint64_t *)(PTR)))
+
+
+static inline bool bitmap_test(void *bitmap, size_t bit) {
+    bool ret;
+    asm volatile (
+        "bt %1, %2"
+        : "=@ccc" (ret)
+        : "m" (FLAT_PTR(bitmap)), "r" (bit)
+        : "memory"
+    );
+    return ret;
+}
+
+static inline bool bitmap_set(void *bitmap, size_t bit) {
+    bool ret;
+    asm volatile (
+        "bts %1, %2"
+        : "=@ccc" (ret), "+m" (FLAT_PTR(bitmap))
+        : "r" (bit)
+        : "memory"
+    );
+    return ret;
+}
+
+static inline bool bitmap_unset(void *bitmap, size_t bit) {
+    bool ret;
+    asm volatile (
+        "btr %1, %2"
+        : "=@ccc" (ret), "+m" (FLAT_PTR(bitmap))
+        : "r" (bit)
+        : "memory"
+    );
+    return ret;
+}
 
 #endif
