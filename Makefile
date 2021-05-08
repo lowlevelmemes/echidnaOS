@@ -7,8 +7,8 @@ IMGSIZE := 32768
 all: echidna.img
 
 limine/limine-install:
-	git clone https://github.com/limine-bootloader/limine.git --branch=v0.5.7 --depth=1
-	cd limine && $(MAKE) limine-install
+	git clone https://github.com/limine-bootloader/limine.git --branch=v2.0-binary --depth=1
+	$(MAKE) -C limine
 
 run:
 	qemu-system-x86_64 -net none -enable-kvm -cpu host -hda echidna.img -m 2G -soundhw pcspk -debugcon stdio
@@ -37,5 +37,6 @@ echidna.img: limine/limine-install kernel/echidna.elf shell/sh
 	echfs-utils -m -p0 echidna.img import ./LICENSE.md /docs/license
 	echfs-utils -m -p0 echidna.img import ./kernel/echidna.elf echidna.elf
 	echfs-utils -m -p0 echidna.img import ./limine.cfg limine.cfg
+	echfs-utils -m -p0 echidna.img import ./limine/limine.sys limine.sys
 	./copy-root-to-img.sh build/system-root/ echidna.img 0
-	limine/limine-install limine/limine.bin echidna.img
+	limine/limine-install echidna.img
