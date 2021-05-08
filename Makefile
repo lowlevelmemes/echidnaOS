@@ -1,13 +1,13 @@
 PATH := $(shell pwd)/build/tools/host-binutils/bin:$(PATH)
 PATH := $(shell pwd)/build/tools/host-gcc/bin:$(PATH)
-IMGSIZE := 32768
+IMGSIZE := 64
 
 .PHONY: all clean run
 
 all: echidna.img
 
 limine/limine-install:
-	git clone https://github.com/limine-bootloader/limine.git --branch=v2.0-binary --depth=1
+	git clone https://github.com/limine-bootloader/limine.git --branch=v2.0-branch-binary --depth=1
 	$(MAKE) -C limine
 
 run:
@@ -25,10 +25,10 @@ clean:
 
 echidna.img: limine/limine-install kernel/echidna.elf shell/sh
 	rm -f echidna.img
-	dd bs=$(IMGSIZE) count=0 seek=65536 if=/dev/zero of=echidna.img
+	dd bs=1M count=0 seek=$(IMGSIZE) if=/dev/zero of=echidna.img
 	parted -s echidna.img mklabel msdos
 	parted -s echidna.img mkpart primary 2048s 100%
-	echfs-utils -m -p0 echidna.img format $(IMGSIZE)
+	echfs-utils -m -p0 echidna.img format 32768
 	echfs-utils -m -p0 echidna.img mkdir dev
 	echfs-utils -m -p0 echidna.img mkdir bin
 	echfs-utils -m -p0 echidna.img mkdir sys
